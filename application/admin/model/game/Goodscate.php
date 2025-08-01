@@ -5,20 +5,19 @@ namespace app\admin\model\game;
 use think\Model;
 use traits\model\SoftDelete;
 
-class Cate extends Model
+class Goodscate extends Model
 {
 
     use SoftDelete;
 
+    
 
     // 表名
-    protected $name = 'cate';
+    protected $name = 'goods_cate';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'datetime';
     protected $dateFormat = 'Y-m-d H:i:s';
-
-    protected $resultSetType = 'collection';
 
     // 定义时间戳字段名
     protected $createTime = 'createtime';
@@ -27,6 +26,7 @@ class Cate extends Model
 
     // 追加属性
     protected $append = [
+        'is_win_text',
         'status_text'
     ];
     
@@ -34,29 +34,30 @@ class Cate extends Model
     protected static function init()
     {
         self::afterInsert(function ($row) {
-            if (!isset($row['weigh']) || !$row['weigh']) {
+            if (!$row['weigh']) {
                 $pk = $row->getPk();
                 $row->getQuery()->where($pk, $row[$pk])->update(['weigh' => $row[$pk]]);
             }
-
-            db('goods_cate')->where('id', $row['id'])->insert([
-                'cate_id' => $row['id'],
-                'goods_id' => 0,
-                'name'  => 'Não ganhou',
-                'abbr' => 'Não ganhou',
-                'odds' => 0.8,
-                'show_odds' => 0,
-                'is_win' => 0,
-                'createtime' => datetime(time()),
-                'updatetime' => datetime(time())
-            ]);
         });
     }
 
     
+    public function getIsWinList()
+    {
+        return ['0' => __('Is_win 0'), '1' => __('Is_win 1')];
+    }
+
     public function getStatusList()
     {
         return ['0' => __('Status 0'), '1' => __('Status 1')];
+    }
+
+
+    public function getIsWinTextAttr($value, $data)
+    {
+        $value = $value ?: ($data['is_win'] ?? '');
+        $list = $this->getIsWinList();
+        return $list[$value] ?? '';
     }
 
 
@@ -67,18 +68,11 @@ class Cate extends Model
         return $list[$value] ?? '';
     }
 
-    public static function softDelData($where)
-    {
-        return self::onlyTrashed()->where($where)->select();
-    }
 
-    public function children()
-    {
-        return $this->hasMany(__CLASS__, 'pid');
-    }
 
-    public function games()
+
+    public function cate()
     {
-        return $this->hasMany('Games', 'cate_id', 'id');
+        return $this->belongsTo('app\admin\model\Cate', 'cate_id', 'id', [], 'LEFT')->setEagerlyType(0);
     }
 }

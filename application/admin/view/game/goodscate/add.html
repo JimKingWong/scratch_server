@@ -1,5 +1,24 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
+     <div class="form-group">
+        <label for="pid" class="control-label col-xs-12 col-sm-2">{:__('上级分类')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select name="row[pid]" data-rule="required" id="pid" class="form-control">
+                <option value="0">{:__('None')}</option>
+                {foreach name="cateList" item="vo"}
+                <option value="{$vo.id}" {if input('pid')==$vo.id }selected {/if} >
+                {$vo.name}
+                </option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Goods_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-goods_id" data-rule="required" data-source="goods/index" class="form-control selectpage" name="row[goods_id]" type="text" value="">
+        </div>
+    </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Name')}:</label>
         <div class="col-xs-12 col-sm-8">
@@ -26,16 +45,34 @@
             <ul class="row list-inline faupload-preview" id="p-image"></ul>
         </div>
     </div>
-    <!-- <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Thumb')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-thumb" class="form-control" name="row[thumb]" type="text">
-        </div>
-    </div> -->
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Price')}:</label>
         <div class="col-xs-12 col-sm-8">
             <input id="c-price" class="form-control" step="0.01" name="row[price]" type="number" value="0.00">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Odds')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-odds" class="form-control" step="0.0001" name="row[odds]" type="number" value="0.0000">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Show_odds')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-show_odds" class="form-control" step="0.01" name="row[show_odds]" type="number" value="0.00">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_win')}:</label>
+        <div class="col-xs-12 col-sm-8">
+                        
+            <select  id="c-is_win" class="form-control selectpicker" name="row[is_win]">
+                {foreach name="isWinList" item="vo"}
+                    <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+
         </div>
     </div>
     <div class="form-group">

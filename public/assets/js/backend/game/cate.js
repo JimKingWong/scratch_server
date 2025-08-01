@@ -89,12 +89,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
                                 {
                                     name: 'index',
-                                    text: __('游戏'),
+                                    text: __('商品'),
                                     classname: 'btn btn-info btn-xs btn-dialog',
                                     icon: 'fa fa-users',
                                     extend: 'data-area=\'["90%","90%"]\'',
                                     url: function(row, value, index){
-                                        return 'game/games/index?cate_id=' + row.id;
+                                        return 'game/goodscate/index?cate_id=' + row.id;
                                     }
                                 }
 

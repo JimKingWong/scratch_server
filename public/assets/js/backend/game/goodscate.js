@@ -5,13 +5,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 extend: {
-                    index_url: 'game/goods/index' + location.search,
-                    add_url: 'game/goods/add',
-                    edit_url: 'game/goods/edit',
-                    del_url: 'game/goods/del',
-                    multi_url: 'game/goods/multi',
-                    import_url: 'game/goods/import',
-                    table: 'goods',
+                    index_url: 'game/goodscate/index' + location.search,
+                    add_url: 'game/goodscate/add',
+                    edit_url: 'game/goodscate/edit',
+                    del_url: 'game/goodscate/del',
+                    multi_url: 'game/goodscate/multi',
+                    import_url: 'game/goodscate/import',
+                    table: 'goods_cate',
                 }
             });
 
@@ -28,26 +28,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
-                        {field: 'name', title: __('Name'), operate: 'LIKE', table: table},
-                        {field: 'abbr', title: __('Abbr'), operate: 'LIKE', table: table},
+                        {field: 'cate.name', title: __('Cate.name'), operate: 'LIKE'},
+                        {field: 'cate.image', title: __('Cate.image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
+                        {field: 'goods_id', title: __('Goods_id'), operate: 'LIKE'},
+                        {field: 'name', title: __('Name'), operate: 'LIKE'},
                         {field: 'image', title: __('Image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
-                        // {field: 'thumb', title: __('Thumb'), operate: false, table: table},
                         {field: 'price', title: __('Price'), operate:'BETWEEN'},
+                        {field: 'odds', title: __('Odds'), operate:'BETWEEN'},
+                        {field: 'show_odds', title: __('Show_odds'), operate:'BETWEEN'},
+                        {field: 'is_win', title: __('Is_win'), searchList: {"0":__('Is_win 0'),"1":__('Is_win 1')}, formatter: Table.api.formatter.normal},
                         {field: 'status', title: __('Status'), searchList: {"0":__('Status 0'),"1":__('Status 1')}, formatter: Table.api.formatter.toggle},
                         {field: 'weigh', title: __('Weigh'), operate: false},
                         {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', autocomplete:false},
-                        {field: 'updatetime', title: __('Updatetime'), operate:'RANGE', addclass:'datetimerange', autocomplete:false},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
-                ]
-            });
-
-            $(document).on("click", ".btn-patchadd", function () {
-                //如果操作全部则ids可以置为空
-                var ids = Table.api.selectedids(table);
-                // console.log(ids);
-                Backend.api.open('game/goods/patchadd?ids=' + ids.join(","), '商品归类', {area: ['40%', '60%']});
-            
+                ],
+                queryParams: function (params) {
+                    //这里可以追加搜索条件
+                    var filter = JSON.parse(params.filter);
+                    var op = JSON.parse(params.op);
+                    //这里可以动态赋值，比如从URL中获取admin_id的值，filter.admin_id=Fast.api.query('admin_id');
+                    filter.cate_id = Config.cate_id;
+                    op.cate_id = "=";
+                    params.filter = JSON.stringify(filter);
+                    params.op = JSON.stringify(op);
+                    return params;
+                },
             });
 
             // 为表格绑定事件
@@ -65,7 +71,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             // 初始化表格
             table.bootstrapTable({
-                url: 'game/goods/recyclebin' + location.search,
+                url: 'game/goodscate/recyclebin' + location.search,
                 pk: 'id',
                 sortName: 'id',
                 columns: [
@@ -92,7 +98,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     text: __('Restore'),
                                     classname: 'btn btn-xs btn-info btn-ajax btn-restoreit',
                                     icon: 'fa fa-rotate-left',
-                                    url: 'game/goods/restore',
+                                    url: 'game/goodscate/restore',
                                     refresh: true
                                 },
                                 {
@@ -100,7 +106,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     text: __('Destroy'),
                                     classname: 'btn btn-xs btn-danger btn-ajax btn-destroyit',
                                     icon: 'fa fa-times',
-                                    url: 'game/goods/destroy',
+                                    url: 'game/goodscate/destroy',
                                     refresh: true
                                 }
                             ],
@@ -114,9 +120,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.bindevent(table);
         },
 
-        patchadd: function () {
-            Controller.api.bindevent();
-        },
         add: function () {
             Controller.api.bindevent();
         },
