@@ -39,7 +39,7 @@ class Game extends Base
 
         $user = $this->auth->getUser();
 
-        $check_order = db('order')->where('cate_id', $cate_id)->where('user_id', $this->auth->id)->where('status', 1)->field('id')->find();
+        $check_order = db('order')->where('cate_id', $cate_id)->where('user_id', $this->auth->id)->where('status', 1)->field('id,order_no,grid')->find();
         
         if ($check_order) {
             $retval = [
