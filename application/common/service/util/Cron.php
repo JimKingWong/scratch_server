@@ -110,19 +110,26 @@ class Cron
                 $v->remark = '代付失败! 原因: ' . $res['msg'];
                 $result = $v->save();
 
-                // 数据准备
-                $data = [
-                    'withdraw_return' => [
-                        'money'                 => $v->money,
-                        'typing_amount_limit'   => 0,
-                        'transaction_id'        => $v->order_no, // 记录表id
-                        'status'                => 0,
-                    ],
-                ];
-
                 if($result){
                     $user = User::where('id', $v->user_id)->find();
-                    User::insertLog($user, $data);
+
+                    // 返回金额到用户钱包
+                    $before = $user->money;
+                    $after = $user->money + $v->money;
+                    $user->money = $after;
+                    $user->bonus = $user->bonus + $v->money;
+                    $user->save();
+
+                    MoneyLog::create([
+                        'admin_id'          => $user->admin_id,
+                        'user_id'           => $user->id,
+                        'type'              => 'withdraw_return',
+                        'before'            => $before,
+                        'after'             => $after,
+                        'money'             => $v->money,
+                        'memo'              => '提现拒绝',
+                        'transaction_id'    => $v['order_no'],
+                    ]);
                 }
 
                 echo $channel['name'] . '单号: ' . $v['order_no'] . '代付失败! 原因: ' . $res['msg'] . "\n  上游提示有误, 联系开发处理". "\n";
