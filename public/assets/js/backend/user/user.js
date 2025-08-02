@@ -73,9 +73,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }
                         },
                         {field: 'pay_password', title: __('支付密码')},
-                        {field: 'userdata.total_bet', title: __('流水'), sortable: true, operate: 'BETWEEN'},
-                        {field: 'userdata.today_bet', title: __('今日流水'), sortable: true, operate: 'BETWEEN'},
-                        {field: 'userdata.typing_amount_limit', title: __('提现所需流水'), sortable: true, operate: 'BETWEEN'},
                         {field: 'userdata.total_withdraw', title: __('累计提现'), sortable: true, operate: 'BETWEEN'},
                         {field: 'userdata.total_recharge', title: __('累计充值'), sortable: true, operate: 'BETWEEN'},
                         {field: 'userdata.total_profit', title: __('累计盈利'), sortable: true, operate: 'BETWEEN'},

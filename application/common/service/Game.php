@@ -214,6 +214,12 @@ class Game extends Base
                     $result = false;
                 }
 
+                $user->userdata->total_profit = $user->userdata->total_profit + $goods['price'];
+                $user->userdata->today_profit = $user->userdata->today_profit + $goods['price'];
+                if($user->userdata->save() === false){
+                    $result = false;
+                }
+
                 if(MoneyLog::create([
                     'admin_id'          => $user->admin_id,
                     'user_id'           => $user->id,
