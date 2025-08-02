@@ -46,14 +46,20 @@ class Goods extends Base
         }
         $map['cate_id'] = $cate_id;
         $map['status'] = 1;
-        $is_order = db('order')
-            ->where($map)
-            ->find() ? 1 : 0;
-        
+        $order = db('order')->where($map)->find();
+
+        $is_order = 0;
+        $grid = [];
+        if($order){
+            $is_order = 1;
+            $grid = json_decode($order['grid'], true);
+        }
+            
         $retval = [
             'cate' => $cate,
             'list' => $list,
-            'is_order' => $is_order
+            'is_order' => $is_order,
+            'grid'     => $grid,
         ];
         $this->success(__('请求成功'), $retval);
     }

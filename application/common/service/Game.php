@@ -37,7 +37,7 @@ class Game extends Base
             $this->error(__('游戏不存在'));
         }
 
-        $check_order = db('order')->where('cate_id', $cate_id)->where('user_id', $this->auth->id)->where('status', 1)->find();
+        $check_order = db('order')->where('cate_id', $cate_id)->where('user_id', $this->auth->id)->where('status', 1)->field('id')->find();
         if ($check_order) {
             $this->error(__('您本次已购买过该游戏'));
         }
@@ -54,11 +54,11 @@ class Game extends Base
         // 并发处理
         $lock_key = 'buy:lock_' . $this->auth->id;
 
-        $is_lock = $redis->setnx($lock_key, 0.5); // 加锁
+        $is_lock = $redis->setnx($lock_key, 1); // 加锁
 
         if(!$is_lock){
             // 释放锁
-            $redis->del($lock_key);
+            // $redis->del($lock_key);
             $this->error(__('请勿重复提交'));
         }
 
@@ -96,18 +96,18 @@ class Game extends Base
 
                 $result = $user->save();
 
-                if(MoneyLog::create([
-                    'admin_id'          => $user->admin_id,
-                    'user_id'           => $user->id,
-                    'type'              => 'buy_goods',
-                    'before'            => $before,
-                    'after'             => $after,
-                    'money'             => $cate->price,
-                    'memo'              => '购买游戏',
-                    'transaction_id'    => $order_no,
-                ]) === false){
-                    $result = false;
-                }
+                // if(MoneyLog::create([
+                //     'admin_id'          => $user->admin_id,
+                //     'user_id'           => $user->id,
+                //     'type'              => 'buy_goods',
+                //     'before'            => $before,
+                //     'after'             => $after,
+                //     'money'             => $cate->price,
+                //     'memo'              => '购买游戏',
+                //     'transaction_id'    => $order_no,
+                // ]) === false){
+                //     $result = false;
+                // }
 
                 // 创建订单并生成对应订单的九宫格
                 $data = [
@@ -293,7 +293,7 @@ class Game extends Base
         $retval = [
             'money'      => number_format($user->money, 2),
             'award_item' => $goods,
-            'item'       => $grid,
+            'grid'       => $grid,
         ];
 
         $this->success(__('请求成功'), $retval);
