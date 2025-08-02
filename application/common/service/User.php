@@ -579,24 +579,6 @@ class User extends Base
             // return ($timeA < $timeB) ? -1 : 1;
         });
 
-
-        // $record = db('user_money_log')->where('user_id', $user->id)
-        //     ->where('type', 'in', ['recharge', 'withdraw', 'withdraw_return'])
-        //     ->field('id,user_id,type,money,transaction_id,createtime')
-        //     ->select();
-
-        // $recharge = [];
-        // $withdraw = [];
-        // foreach($record as $key=>$val){
-        //     $val['createtime'] = date('m/d/Y H:i:s', $val['createtime']);
-        //     if($val['type'] == 'recharge'){
-        //         $recharge[] = $val;
-        //     }else{
-        //         $withdraw[] = $val;
-        //     }
-        //     $record[$key] = $val;
-        // }
-
         $retval = [
             'money'             => number_format($user->money),
             'freeze_money'      => number_format($user->money - $user->bonus),
