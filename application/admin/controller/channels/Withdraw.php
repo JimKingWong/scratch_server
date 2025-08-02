@@ -6,6 +6,7 @@ use app\admin\model\channels\Channel;
 use app\common\controller\Backend;
 use app\common\model\game\Jdb;
 use app\common\model\game\Omg;
+use app\common\model\MoneyLog;
 use app\common\model\Recharge;
 use app\common\model\User;
 use app\common\service\Channel as ServiceChannel;
@@ -282,6 +283,8 @@ class Withdraw extends Backend
         // 直接修改状态2
         $params['status'] = 2;
 
+        $user = User::where('id', $row->user_id)->find();
+
         $result = false;
         Db::startTrans();
         try {
@@ -294,18 +297,25 @@ class Withdraw extends Backend
             $result = $row->allowField(true)->save($params);
 
             // 返回金额到用户钱包
-            // 数据准备
-            $data = [
-                'withdraw_return' => [
-                    'money'                 => $row->money,
-                    'typing_amount_limit'   => 0,
-                    'transaction_id'        => $row->order_no, // 记录表id
-                    'status'                => 0,
-                ],
-            ];
-            if(User::insertLog($row->user, $data) === false){
+            $before = $user->money;
+            $after = $user->money + $row->money;
+            $user->money = $after;
+            $user->bonus = $user->bonus + $row->money;
+            $result = $user->save();
+
+            if(MoneyLog::create([
+                'admin_id'          => $user->admin_id,
+                'user_id'           => $user->id,
+                'type'              => 'withdraw_return',
+                'before'            => $before,
+                'after'             => $after,
+                'money'             => $row->money,
+                'memo'              => '提现拒绝',
+                'transaction_id'    => $row['order_no'],
+            ]) === false){
                 $result = false;
             }
+         
             if($result != false){
                 Db::commit();
             }

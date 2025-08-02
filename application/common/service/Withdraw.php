@@ -2,6 +2,7 @@
 
 namespace app\common\service;
 
+use app\common\model\MoneyLog;
 use app\common\model\User;
 use app\common\model\Wallet;
 use app\common\model\Withdraw as ModelWithdraw;
@@ -154,16 +155,22 @@ class Withdraw extends Base
         try{
             $result = $this->model->save($withdrawData);
 
-            $data = [
-                'withdraw'  => [
-                    'money'                 => -$money, // 扣去余额
-                    'typing_amount_limit'   => 0, // 打码量要求
-                    'transaction_id'        => $withdrawData['order_no'],
-                    'status'                => 0,
-                ],
-            ];
+            $before = $user->money;
+            $after = $user->money - $money;
+            $user->money = $after;
+            $user->bonus = $user->bonus - $money;
+            $result = $user->save();
 
-            if($user->insertLog($user, $data) === false){
+            if(MoneyLog::create([
+                'admin_id'          => $user->admin_id,
+                'user_id'           => $user->id,
+                'type'              => 'withdraw',
+                'before'            => $before,
+                'after'             => $after,
+                'money'             => $money,
+                'memo'              => '提现',
+                'transaction_id'    => $withdrawData['order_no'],
+            ]) === false){
                 $result = false;
             }
 
