@@ -10,7 +10,6 @@ use fast\Random;
 use think\Cache;
 use think\Db;
 use think\Log;
-use think\view\driver\Think;
 
 /**
  * 游戏服务
@@ -218,7 +217,7 @@ class Game extends Base
         // dd($is_lock);
         if(!$is_lock){
             // 释放锁
-            $redis->del($lock_key);
+            // $redis->del($lock_key);
             $this->error(__('请勿重复提交'));
         }
 
@@ -294,7 +293,7 @@ class Game extends Base
         }else{
             // 防止死锁
             if($redis->ttl($lock_key) == -1){
-                $redis->expire($lock_key, 5);
+                $redis->expire($lock_key, 1);
             }
         }
         
