@@ -290,10 +290,8 @@ class Game extends Base
             }
         }
         
-        $win_amount = db('game_record')->where('cate_id', $cate_id)->where('user_id', $user->id)->sum('win_amount');
         $retval = [
             'money'      => number_format($user->money, 2),
-            'win_amount' => $win_amount,
             'award_item' => $goods,
             'item'       => $grid,
         ];
