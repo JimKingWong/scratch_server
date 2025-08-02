@@ -548,22 +548,54 @@ class User extends Base
     {
         $user = $this->auth->getUser();
 
-        $record = db('user_money_log')->where('user_id', $user->id)
-            ->where('type', 'in', ['recharge', 'withdraw', 'withdraw_return'])
-            ->field('id,user_id,type,money,transaction_id,createtime')
-            ->select();
-
-        $recharge = [];
-        $withdraw = [];
-        foreach($record as $key=>$val){
-            $val['createtime'] = date('m/d/Y H:i:s', $val['createtime']);
-            if($val['type'] == 'recharge'){
-                $recharge[] = $val;
-            }else{
-                $withdraw[] = $val;
-            }
-            $record[$key] = $val;
+        $recharge = db('recharge')->where('user_id', $user->id)->field('id,order_no,money,status,paytime,createtime')->select();
+        foreach($recharge as $key=>$val){
+            $val['status_text'] = $val['status'] == 0 ? __('未支付') : __('已支付');
+            $recharge[$key] = $val;
         }
+
+        $withdraw = db('withdraw')->where('user_id', $user->id)->field('id,order_no,money,real_money,status,paytime,createtime')->select();
+        $arr = [__('审核中'), __('提现成功'), __('拒绝'), __('提现失败'), __('异常')];
+        foreach($withdraw as $key=>$val){
+            $val['status_text'] = $arr[$val['status']];
+            $withdraw[$key] = $val;
+        }
+
+
+        $record = array_merge($recharge, $withdraw);
+        
+        usort($record, function($a, $b) {
+            // 如果createtime不存在，则使用paytime
+            $timeA = isset($a['createtime']) ? $a['createtime'] : $a['paytime'];
+            $timeB = isset($b['createtime']) ? $b['createtime'] : $b['paytime'];
+            
+            // 降序排序（最新的在前）
+            if ($timeA == $timeB) {
+                return 0;
+            }
+            return ($timeA > $timeB) ? -1 : 1;
+            
+            // 如果需要升序排序（最旧的在前），使用下面的代码
+            // return ($timeA < $timeB) ? -1 : 1;
+        });
+
+
+        // $record = db('user_money_log')->where('user_id', $user->id)
+        //     ->where('type', 'in', ['recharge', 'withdraw', 'withdraw_return'])
+        //     ->field('id,user_id,type,money,transaction_id,createtime')
+        //     ->select();
+
+        // $recharge = [];
+        // $withdraw = [];
+        // foreach($record as $key=>$val){
+        //     $val['createtime'] = date('m/d/Y H:i:s', $val['createtime']);
+        //     if($val['type'] == 'recharge'){
+        //         $recharge[] = $val;
+        //     }else{
+        //         $withdraw[] = $val;
+        //     }
+        //     $record[$key] = $val;
+        // }
 
         $retval = [
             'money'             => number_format($user->money),
