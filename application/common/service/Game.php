@@ -306,7 +306,7 @@ class Game extends Base
      */
     public function getGoodsGrid($cate_id, $goods)
     {
-        $fields = "id,cate_id,goods_id,name,abbr,image,price,odds,is_win";
+        $fields = "id,cate_id,goods_id,name,abbr,image,price";
         if($goods['is_win'] > 0){
             // 中奖显示的格子
             $winItem = db('goods_cate')->where('cate_id', $cate_id)->where('is_win', 1)->where('id', $goods['id'])->field($fields)->find();
