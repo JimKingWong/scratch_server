@@ -3,10 +3,10 @@
 namespace app\common\service;
 
 use app\common\model\Cate;
+use app\common\model\MoneyLog;
 use app\common\model\Order;
 use app\common\model\User;
 use fast\Random;
-use think\Cache;
 use think\Db;
 
 /**
@@ -31,7 +31,7 @@ class Game extends Base
 
         $cate = Cate::where('id', $cate_id)->find();
         if (!$cate) {
-            $this->error(__('商品不存在'));
+            $this->error(__('游戏不存在'));
         }
 
         $user = $this->auth->getUser();
@@ -46,16 +46,24 @@ class Game extends Base
         Db::startTrans();
         try{
             $user = User::lock(true)->find($user->id);
-            $reward_data = [
-                'buy_goods' => [
-                    'money'                 => -$cate['price'],
-                    'typing_amount_limit'   => $cate['price'], // 计算打赏金额限制
-                    'transaction_id'        => $order_no, // 记录表id
-                    'status'                => 1,
-                ],
-            ];
+            $before = $user->money;
+            $after = $user->money - $cate->price;
+            $user->money = $after;
 
-            $result = User::insertLog($user, $reward_data);
+            $result = $user->save();
+
+            if(MoneyLog::create([
+                'admin_id'          => $user->admin_id,
+                'user_id'           => $user->id,
+                'type'              => 'buy_goods',
+                'before'            => $before,
+                'after'             => $after,
+                'money'             => $cate->price,
+                'memo'              => '购买游戏',
+                'transaction_id'    => $order_no,
+            ]) === false){
+                $result = false;
+            }
 
             $data = [
                 'admin_id'  => $user->admin_id,
@@ -65,6 +73,7 @@ class Game extends Base
                 'status'    => 1,
                 'num'       => 1,
                 'price'     => $cate->price,
+                'paytime'   => datetime(time()),
             ];
 
             if(Order::create($data) === false){
@@ -84,7 +93,7 @@ class Game extends Base
             $this->error(__('购买失败'));
         }
 
-        $this->success(__('请求成功'), ['order_no' => $order_no, 'money' => $user->money,]);
+        $this->success(__('请求成功'), ['order_no' => $order_no, 'money' => number_format($user->money, 2)]);
     }
     
     public function checkPlay($user, $cate_id)
@@ -117,7 +126,7 @@ class Game extends Base
         $game = db('game_record')->where($where)->field('id,roundid')->find();
 
         if($game){
-            $this->success(__('请求成功'), ['roundid' => $game['roundid']]);
+            $this->success(__('请求成功'), ['roundid' => $game['roundid'], 'money' => number_format($user->money, 2)]);
         }
 
         $roundid = $user->id . '_' . $cate_id . '_' . date('YmdHis');
@@ -134,7 +143,7 @@ class Game extends Base
         ];
 
         db('game_record')->insert($data);
-        $this->success(__('请求成功'), ['roundid' => $roundid, 'money' => $user->money,]);
+        $this->success(__('请求成功'), ['roundid' => $roundid, 'money' => number_format($user->money, 2)]);
     }
 
     /**
@@ -170,6 +179,7 @@ class Game extends Base
         $goods_id = Random::lottery($arr);
         // dd($goods);
         $goods = $goods[$goods_id];
+        // $goods = $goods[1];
         $goods['image'] = $goods['image'] ? cdnurl($goods['image']) : '';
 
         // 获取九宫格
@@ -180,40 +190,47 @@ class Game extends Base
         try{
             $user = User::lock(true)->find($user->id);
 
-            // $user->userdata->total_bet += $goods['price'];
-            // $user->userdata->today_bet += $goods['price'];
-            // $result = $user->userdata->save();
-        
-            if($goods['is_win'] > 0){
-                // 数据准备
-                $reward_data = [
-                    'lottery' => [
-                        'money'                 => $goods['price'],
-                        'typing_amount_limit'   => $goods['price'], // 计算打赏金额限制
-                        'transaction_id'        => $game['roundid'], // 记录表id
-                        'status'                => 1,
-                    ],
-                ];
-                
-                User::insertLog($user, $reward_data);
-            }
-            
-            db('game_record')->where('id', $game['id'])->update([
+            $result = db('game_record')->where('id', $game['id'])->update([
                 'status'        => 1, 
                 'goods_cate_id' => $goods_id, 
                 'win_amount'    => $goods['price'],
+                'is_win'        => $goods['is_win'],
                 'prizes'        => json_encode($goods),
                 'updatetime'    => datetime(time()),
                 'endtime'       => datetime(time()),
             ]);
 
-            db('order')->where('id', $order['id'])->update(['status' => 2]);
+            if(db('order')->where('id', $order['id'])->update(['status' => 2]) === false){
+                $result = false;
+            }
+        
+            if($goods['is_win'] > 0){
+                $before = $user->money;
+                $after = $user->money + $goods['price'];
+                $user->money = $after;
+                $user->bonus = $user->bonus + $goods['price'];
 
-            Db::commit();
+                if($user->save() === false){
+                    $result = false;
+                }
 
-            // if($result != false){
-            //     Db::commit();
-            // }
+                if(MoneyLog::create([
+                    'admin_id'          => $user->admin_id,
+                    'user_id'           => $user->id,
+                    'type'              => 'lottery',
+                    'before'            => $before,
+                    'after'             => $after,
+                    'money'             => $goods['price'],
+                    'memo'              => '刮刮乐中奖',
+                    'transaction_id'    => $game['roundid'],
+                ]) === false){
+                    $result = false;
+                }
+            }
+            
+            if($result != false){
+                Db::commit();
+            }
 
         }catch(\Exception $e){
             echo $e->getMessage();
@@ -226,7 +243,7 @@ class Game extends Base
             'win_amount' => $win_amount,
             'award_item' => $goods,
             'item'       => $grid,
-            'money'      => $user->money,
+            'money'      => number_format($user->money, 2),
         ];
 
         $this->success(__('请求成功'), $retval);

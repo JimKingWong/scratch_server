@@ -32,13 +32,14 @@ class Withdraw extends Base
             ->field('id,name,area_code,phone_number,chave_pix,pix,cpf,is_default')
             ->select();
 
-        $need_bet = max($user->userdata->typing_amount_limit - $user->userdata->total_bet, 0);
+        // $need_bet = max($user->userdata->typing_amount_limit - $user->userdata->total_bet, 0);
         $retval = [
             'is_set'        => $user->pay_password ? 1 : 0, // 密码检查
             'min_withdraw'  => config('system.min_withdraw'), // 最小提现金额
             'withdraw_rate' => config('system.withdraw_rate'), // 提现手续费
             'money'         => $user->money, // 账户余额
-            'need_bet'      => sprintf('%.2f', $need_bet), // 打码量
+            'bonus'         => $user->bonus, // 奖金余额 可提金额
+            // 'need_bet'      => sprintf('%.2f', $need_bet), // 打码量
             'wallet'        => $wallet, // 钱包列表
         ];
         $this->success(__('请求成功'), $retval);
@@ -75,7 +76,7 @@ class Withdraw extends Base
         // 打码量符合要求 总流水 0 充值100 不参与活动 提现所需打码金额 100  验证 总流水是不是大于提现所需打码金额
         if($user->userdata->typing_amount_limit > $user->userdata->total_bet){
             // Complete sua aposta para continuar
-            $this->error(__('完成投注即可继续'));
+            // $this->error(__('完成投注即可继续'));
         }
 
         // 钱包信息
@@ -123,25 +124,6 @@ class Withdraw extends Base
             $this->error(__('一个CPF只能用于一个账户'));
         }
 
-        // // 如果当前用户也要用这个cpf
-        // dd($sameWalletId);
-
-        // // 7日内一个账号只能三个用户使用 去提现表查询用相同cpf的用户
-        // $checkSameCpfUser = $this->model
-        //     ->where('wallet_id', 'in', $sameWalletId)
-        //     ->where('status', 1)
-        //     ->whereTime('createtime', '>=', datetime(strtotime('-7 days')))
-        //     ->group('user_id')
-        //     ->column('user_id');
-        
-        // // 排除不是同一个站点的用户id
-        // $diffUserids = User::where('origin', $user->origin)->where('id', 'in', $checkSameCpfUser)->column('id');
-        // dd($diffUserids);
-        // if(count($diffUserids) > 1){
-        //     //  为什么大于等于1, 不是三个用户吗 TODO
-        //     $this->error(__('一个CPF只能用于一个账户'));
-        // }
-
         $min_withdraw = $system['min_withdraw']; // 最小提现金额
         $withdraw_rate = $system['withdraw_rate']; // 提现手续费率
 
@@ -149,8 +131,8 @@ class Withdraw extends Base
             $this->error(__('提现金额不能小于最小提现金额'));
         }
 
-        if($money > $user->money){
-            $this->error(__('提现金额不能大于账户余额'));
+        if($money > $user->bonus){
+            $this->error(__('提现金额不能大于账户奖金余额'));
         }
 
         // 提现数据

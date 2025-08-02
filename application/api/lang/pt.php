@@ -131,7 +131,7 @@ return [
     '本次提现账号与上次不同，请联系客服修改。' => 'Esta conta de retirada é diferente da última, entre em contato com o atendimento ao cliente para modificá-la.',
     '一个CPF只能用于一个账户'   => 'Um CPF só pode ser usado em uma conta',
     '提现金额不能小于最小提现金额' => 'O valor da retirada não pode ser menor que o valor mínimo de retirada',
-    '提现金额不能大于账户余额' => 'O valor da retirada não pode ser maior que o saldo da conta',
+    '提现金额不能大于账户奖金余额' => 'O valor do saque não pode ser maior que o saldo de bônus da conta',
     '提现申请失败' => 'Falha no pedido de retirada',
     '提现申请成功，请耐心等待审核' => 'Pedido de retirada bem-sucedido, por favor, seja paciente para revisão',
     '账户不正确'    => 'Conta incorreta',

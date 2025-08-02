@@ -540,4 +540,29 @@ class User extends Base
 
         $this->success(__('请求成功'), $retval);
     }
+
+    /**
+     * 奖金数据
+     */
+    public function bonus()
+    {
+        $user = $this->auth->getUser();
+
+        $record = db('user_money_log')->where('user_id', $user->id)
+            ->where('type', 'in', ['recharge', 'withdraw', 'withdraw_return'])
+            ->field('id,user_id,money,transaction_id,createtime')
+            ->select();
+        foreach($record as $key=>$val){
+            $record[$key]['createtime'] = date('m/d/Y H:i:s', $val['createtime']);
+        }
+
+        $retval = [
+            'money'             => $user->money,
+            'freeze_money'      => $user->money - $user->bonus,
+            'bonus'             => $user->bonus,
+            'record'            => $record,
+        ];
+
+        $this->success(__('请求成功'), $retval);
+    }
 }

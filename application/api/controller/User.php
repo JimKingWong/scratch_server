@@ -164,4 +164,13 @@ class User extends Api
         $service = new \app\common\service\User();
         $service->rank();
     }
+
+    /**
+     * 奖金数据
+     */
+    public function bonus()
+    {
+        $service = new \app\common\service\User();
+        $service->bonus();
+    }
 }
