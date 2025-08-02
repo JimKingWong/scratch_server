@@ -157,14 +157,14 @@ class Game extends Base
 
         $order = $this->checkPlay($user, $cate_id);
         
-        $where['user_id'] = $user->id;
-        $where['cate_id'] = $cate_id;
-        $where['status'] = '0';
-        $game = db('game_record')->where($where)->field('id,roundid')->find();
-        // dd($game);
-        if (!$game) {
-            $this->error(__('游戏不存在'));
-        }
+        // $where['user_id'] = $user->id;
+        // $where['cate_id'] = $cate_id;
+        // $where['status'] = '0';
+        // $game = db('game_record')->where($where)->field('id,roundid')->find();
+        // // dd($game);
+        // if (!$game) {
+        //     $this->error(__('游戏不存在'));
+        // }
 
         $winItem = db('goods_cate')->where('cate_id', 1)->field('id,name,price,odds,is_win,image')->select();
 
@@ -185,20 +185,37 @@ class Game extends Base
         // 获取九宫格
         $grid = $this->getGoodsGrid(1, $goods);
 
+        $roundid = $user->id . '_' . $cate_id . '_' . date('YmdHis');
+
         $result = false;
         Db::startTrans();
         try{
             $user = User::lock(true)->find($user->id);
-
-            $result = db('game_record')->where('id', $game['id'])->update([
-                'status'        => 1, 
-                'goods_cate_id' => $goods_id, 
-                'win_amount'    => $goods['price'],
+            
+            $data = [
+                'admin_id'  => $user->admin_id,
+                'user_id'   => $user->id,
+                'cate_id'   => $cate_id,
+                'roundid'   => $roundid,
+                'status'    => 1,
+                'goods_cate_id' => $goods_id,
                 'is_win'        => $goods['is_win'],
-                'prizes'        => json_encode($goods),
-                'updatetime'    => datetime(time()),
-                'endtime'       => datetime(time()),
-            ]);
+                'prizes'    => json_encode($goods),
+                'win_amount'=> $goods['price'],
+                'createtime'=> datetime(time()),
+                'updatetime'=> datetime(time()),
+                'endtime'   => datetime(time()),
+            ];
+            $result = db('game_record')->insert($data);
+            // $result = db('game_record')->where('id', $game['id'])->update([
+            //     'status'        => 1, 
+            //     'goods_cate_id' => $goods_id, 
+            //     'win_amount'    => $goods['price'],
+            //     'is_win'        => $goods['is_win'],
+            //     'prizes'        => json_encode($goods),
+            //     'updatetime'    => datetime(time()),
+            //     'endtime'       => datetime(time()),
+            // ]);
 
             if(db('order')->where('id', $order['id'])->update(['status' => 2]) === false){
                 $result = false;
@@ -228,7 +245,7 @@ class Game extends Base
                     'after'             => $after,
                     'money'             => $goods['price'],
                     'memo'              => '刮刮乐中奖',
-                    'transaction_id'    => $game['roundid'],
+                    'transaction_id'    => $roundid,
                 ]) === false){
                     $result = false;
                 }
