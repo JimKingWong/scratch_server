@@ -566,9 +566,9 @@ class User extends Base
         }
 
         $retval = [
-            'money'             => $user->money,
-            'freeze_money'      => $user->money - $user->bonus,
-            'bonus'             => $user->bonus,
+            'money'             => number_format($user->money),
+            'freeze_money'      => number_format($user->money - $user->bonus),
+            'bonus'             => number_format($user->bonus),
             'record'            => $record,
             'recharge'          => $recharge,
             'withdraw'          => $withdraw,
