@@ -291,8 +291,8 @@ class Recharge extends Base
         $params = $this->request->param();
         
 
-        // $params = html_entity_decode($params['data'], ENT_QUOTES, 'UTF-8');
-        // $params = json_decode($params, true);
+        $params = html_entity_decode($params['data'], ENT_QUOTES, 'UTF-8');
+        $params = json_decode($params, true);
         \think\Log::record($params,'ouropago_recharge_param');
         
         $where['order_no'] = $params['orderNo'];
