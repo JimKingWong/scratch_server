@@ -616,7 +616,7 @@ class User extends Base
        
         //模拟一次登录
         $this->auth->direct($user->id);
-        $ret = $this->auth->changepwd($newpassword, '', true);
+        $ret = $this->auth->changepwd($newpassword, $oldpassword, true);
         if ($ret) {
             $this->success(__('Reset password successful'));
         } else {
