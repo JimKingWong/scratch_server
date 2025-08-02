@@ -593,17 +593,54 @@ class User extends Base
     }
 
     /**
-     * 个人资料
+     * 重置密码
+     *
+     * @ApiMethod (POST)
+     * @param string $oldpassword 旧密码
+     * @param string $newpassword 新密码
+     * @param string $surepassword 确认新密码
      */
-    public function info()
+    public function resetpwd()
     {
         $user = $this->auth->getUser();
+        $oldpassword = $this->request->post("oldpassword");
+        $newpassword = $this->request->post("newpassword");
+        $surepassword = $this->request->post("surepassword");
+        if (!$newpassword || !$surepassword || !$oldpassword) {
+            $this->error(__('无效参数'));
+        }
 
-        $userinfo = $user->userinfo;
+        if ($newpassword != $surepassword) {
+            $this->error(__('两次输入密码不一致'));
+        }
+       
+        //模拟一次登录
+        $this->auth->direct($user->id);
+        $ret = $this->auth->changepwd($newpassword, '', true);
+        if ($ret) {
+            $this->success(__('Reset password successful'));
+        } else {
+            $this->error($this->auth->getError());
+        }
+    }
 
-        $retval = [
-        ];
+    /**
+     * 个人信息修改
+     */
+    public function personinfo()
+    {
+        $nickname = $this->request->post("nickname");
+        $email = $this->request->post("email");
 
-        $this->success(__('请求成功'), $retval);
+        if (!$nickname && !$email) {
+            $this->error(__('无效参数'));
+        }
+
+        $user = $this->auth->getUser();
+        $user->nickname = $nickname;
+        $user->email = $email;
+        $user->save();
+
+        $this->success(__('修改成功'));
     }
 }

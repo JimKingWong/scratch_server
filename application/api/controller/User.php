@@ -173,4 +173,27 @@ class User extends Api
         $service = new \app\common\service\User();
         $service->bonus();
     }
+
+    /**
+     * 重置密码
+     *
+     * @ApiMethod (POST)
+     * @param string $oldpassword 旧密码
+     * @param string $newpassword 新密码
+     * @param string $surepassword 确认新密码
+     */
+    public function resetpwd()
+    {
+        $service = new \app\common\service\User();
+        $service->resetpwd();
+    }
+
+    /**
+     * 个人信息修改
+     */
+    public function personinfo()
+    {
+        $service = new \app\common\service\User();
+        $service->personinfo();
+    }
 }
