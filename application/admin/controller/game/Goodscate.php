@@ -14,7 +14,7 @@ use app\admin\model\game\Cate;
  */
 class Goodscate extends Backend
 {
-
+    protected $multiFields = 'is_win,status';
     /**
      * Goodscate模型对象
      * @var \app\admin\model\game\Goodscate

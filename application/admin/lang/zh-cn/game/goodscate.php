@@ -12,6 +12,8 @@ return [
     'Is_win'     => '是否为中奖项',
     'Is_win 0'   => '否',
     'Is_win 1'   => '是',
+    'Set is_win to 0'=> '非奖项',
+    'Set is_win to 1'=> '奖项',
     'Status'     => '状态',
     'Status 0'   => '禁用',
     'Set status to 0'=> '设为禁用',

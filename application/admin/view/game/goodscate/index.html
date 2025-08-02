@@ -31,6 +31,15 @@
                             </ul>
                         </div>
 
+                        <div class="dropdown btn-group {:$auth->check('game/goodscate/multi')?'':'hide'}">
+                            <a class="btn btn-info btn-more dropdown-toggle btn-disabled disabled" data-toggle="dropdown">设为奖项</a>
+                            <ul class="dropdown-menu text-left" role="menu">
+                                {foreach name="isWinList" item="vo"}
+                                <li><a class="btn btn-link btn-multi btn-disabled disabled" href="javascript:" data-params="is_win={$key}">{:__('Set is_win to ' . $key)}</a></li>
+                                {/foreach}
+                            </ul>
+                        </div>
+
                         <a class="btn btn-success btn-recyclebin btn-dialog {:$auth->check('game/goodscate/recyclebin')?'':'hide'}" href="game/goodscate/recyclebin" title="{:__('Recycle bin')}"><i class="fa fa-recycle"></i> {:__('Recycle bin')}</a>
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
