@@ -35,13 +35,13 @@ class Platform extends Base
         }
 
         // 中奖记录
-        $users = db('user')->where('is_test', 0)->column('username', 'id');
-        $record = db('game_record')->where('is_win', 1)->orderRaw("rand()")->limit(20)->select();
+        $users = db('user')->where('is_test', 0)->cache(true, 3600)->column('username', 'id');
+        $record = db('game_record')->where('is_win', 1)->cache(true, 3600)->orderRaw("rand()")->limit(20)->select();
         $awards = [];
         $k = 0;
         if(count($record) < 20){
             // 中间记录比较少时, 用假数据
-            $game_goods = db('goods_cate')->where('status', 1)->field('name,price,image')->orderRaw("rand()")->limit(20)->select();
+            $game_goods = db('goods_cate')->where('status', 1)->cache(true, 3600)->field('name,price,image')->orderRaw("rand()")->limit(20)->select();
             foreach($game_goods as $val){
                 $awards[$k]['username'] = isset($users[array_rand($users)]) ? dealUsername($users[array_rand($users)]) : dealUsername('unknown');
                 $awards[$k]['goods_name'] = $val['name'];
@@ -50,7 +50,7 @@ class Platform extends Base
                 $k ++;
             }
         }else{
-            $goods = db('goods_cate')->column('name,price,image', 'id');
+            $goods = db('goods_cate')->cache(true, 3600)->column('name,price,image', 'id');
             foreach($record as $val){
                 $awards[$k]['username'] = isset($users[$val['user_id']]) ? dealUsername($users[$val['user_id']]) : dealUsername('unknown');
                 $awards[$k]['goods_name'] = $goods[$val['goods_cate_id']]['name'];
