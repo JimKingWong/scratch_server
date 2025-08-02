@@ -32,7 +32,7 @@ class Goods extends Base
         $cate = Cate::where('id', $cate_id)->field('id,name,title,intro,price,image')->find();
         $cate->image = $cate->image ? cdnurl($cate->image) : '';
 
-        $fields = "id,cate_id,goods_id,image";
+        $fields = "id,cate_id,goods_id,image,price";
         $where['is_win'] = 1;
         $list = GoodsCate::where($where)->field($fields)->order('weigh desc')->select();
         // dd($list);
