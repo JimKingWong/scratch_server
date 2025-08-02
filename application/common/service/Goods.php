@@ -40,10 +40,20 @@ class Goods extends Base
         foreach($list as $val){
             $val->image = $val->image ? cdnurl($val->image) : '';
         }
+
+        if(isset($this->auth->id)){
+            $map['user_id'] = $this->auth->id;
+        }
+        $map['cate_id'] = $cate_id;
+        $map['status'] = 0;
+        $is_order = db('order')
+            ->where($map)
+            ->find() ? 1 : 0;
         
         $retval = [
             'cate' => $cate,
             'list' => $list,
+            'is_order' => $is_order
         ];
         $this->success(__('请求成功'), $retval);
     }
