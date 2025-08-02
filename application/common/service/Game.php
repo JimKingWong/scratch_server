@@ -37,12 +37,20 @@ class Game extends Base
             $this->error(__('游戏不存在'));
         }
 
+        $user = $this->auth->getUser();
+
         $check_order = db('order')->where('cate_id', $cate_id)->where('user_id', $this->auth->id)->where('status', 1)->field('id')->find();
+        
         if ($check_order) {
-            $this->error(__('您本次已购买过该游戏'));
+            $retval = [
+                'order_no' => $check_order['order_no'],
+                'money'    => number_format($user->money, 2),
+                'grid'     => json_decode($check_order['grid'], true),
+            ];
+
+            $this->success(__('您本次已购买过该游戏'), $retval);
         }
 
-        $user = $this->auth->getUser();
         
         if($user->money < $cate->price){
             $this->error(__('余额不足'));
@@ -96,18 +104,18 @@ class Game extends Base
 
                 $result = $user->save();
 
-                // if(MoneyLog::create([
-                //     'admin_id'          => $user->admin_id,
-                //     'user_id'           => $user->id,
-                //     'type'              => 'buy_goods',
-                //     'before'            => $before,
-                //     'after'             => $after,
-                //     'money'             => $cate->price,
-                //     'memo'              => '购买游戏',
-                //     'transaction_id'    => $order_no,
-                // ]) === false){
-                //     $result = false;
-                // }
+                if(MoneyLog::create([
+                    'admin_id'          => $user->admin_id,
+                    'user_id'           => $user->id,
+                    'type'              => 'buy_goods',
+                    'before'            => $before,
+                    'after'             => $after,
+                    'money'             => $cate->price,
+                    'memo'              => '购买游戏',
+                    'transaction_id'    => $order_no,
+                ]) === false){
+                    $result = false;
+                }
 
                 // 创建订单并生成对应订单的九宫格
                 $data = [
