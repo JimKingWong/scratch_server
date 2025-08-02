@@ -550,10 +550,19 @@ class User extends Base
 
         $record = db('user_money_log')->where('user_id', $user->id)
             ->where('type', 'in', ['recharge', 'withdraw', 'withdraw_return'])
-            ->field('id,user_id,money,transaction_id,createtime')
+            ->field('id,user_id,type,money,transaction_id,createtime')
             ->select();
+
+        $recharge = [];
+        $withdraw = [];
         foreach($record as $key=>$val){
-            $record[$key]['createtime'] = date('m/d/Y H:i:s', $val['createtime']);
+            $val['createtime'] = date('m/d/Y H:i:s', $val['createtime']);
+            if($val['type'] == 'recharge'){
+                $recharge[] = $val;
+            }else{
+                $withdraw[] = $val;
+            }
+            $record[$key] = $val;
         }
 
         $retval = [
@@ -561,6 +570,23 @@ class User extends Base
             'freeze_money'      => $user->money - $user->bonus,
             'bonus'             => $user->bonus,
             'record'            => $record,
+            'recharge'          => $recharge,
+            'withdraw'          => $withdraw,
+        ];
+
+        $this->success(__('请求成功'), $retval);
+    }
+
+    /**
+     * 个人资料
+     */
+    public function info()
+    {
+        $user = $this->auth->getUser();
+
+        $userinfo = $user->userinfo;
+
+        $retval = [
         ];
 
         $this->success(__('请求成功'), $retval);

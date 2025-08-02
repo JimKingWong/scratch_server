@@ -40,7 +40,7 @@ class Platform extends Base
         $awards = [];
         $k = 0;
         if(count($record) < 20){
-            // 中间记录比较少时, 用假数据
+            // 中奖记录比较少时, 用假数据
             $game_goods = db('goods_cate')->where('status', 1)->cache(true, 3600)->field('name,price,image')->orderRaw("rand()")->limit(20)->select();
             foreach($game_goods as $val){
                 $awards[$k]['username'] = isset($users[array_rand($users)]) ? dealUsername($users[array_rand($users)]) : dealUsername('unknown');
