@@ -33,8 +33,37 @@ class Platform extends Base
             $val->image = $val->image ? cdnurl($val->image) : '';
             $val->price = number_format($val->price, 2);
         }
+
+        // 中奖记录
+        $users = db('user')->where('is_test', 0)->column('username', 'id');
+        $record = db('game_record')->where('is_win', 1)->orderRaw("rand()")->limit(20)->select();
+        $awards = [];
+        $k = 0;
+        if(count($record) < 20){
+            // 中间记录比较少时, 用假数据
+            $game_goods = db('goods_cate')->where('status', 1)->field('name,price,image')->orderRaw("rand()")->limit(20)->select();
+            foreach($game_goods as $val){
+                $awards[$k]['username'] = isset($users[array_rand($users)]) ? dealUsername($users[array_rand($users)]) : dealUsername('unknown');
+                $awards[$k]['goods_name'] = $val['name'];
+                $awards[$k]['goods_price'] = $val['price'];
+                $awards[$k]['goods_image'] = $val['image'] ? cdnurl($val['image']) : '';
+                $k ++;
+            }
+        }else{
+            $goods = db('goods_cate')->column('name,price,image', 'id');
+            foreach($record as $val){
+                $awards[$k]['username'] = isset($users[$val['user_id']]) ? dealUsername($users[$val['user_id']]) : dealUsername('unknown');
+                $awards[$k]['goods_name'] = $goods[$val['goods_cate_id']]['name'];
+                $awards[$k]['goods_price'] = $goods[$val['goods_cate_id']]['price'];
+                $awards[$k]['goods_image'] = $goods[$val['goods_cate_id']]['image'] ? cdnurl($goods[$val['goods_cate_id']]['image']) : '';
+                $k ++;
+            }
+        }
+        
+
         $retval = [
-            'cate' => $cate,
+            'cate'      => $cate,
+            'awards'    => $awards
         ];
         $this->success(__('请求成功'), $retval);
     }

@@ -612,3 +612,12 @@ function is_local_env()
 {
     return in_array($_SERVER['SERVER_ADDR'], ['127.0.0.1', 'localhost']) ? true : false;;
 }
+
+function dealUsername($username)
+{
+    $pattern = '/^(.)(.*)(.)$/';
+    $replacement = '$1**$3';
+    $username = preg_replace($pattern, $replacement, $username);
+
+    return $username;
+}
