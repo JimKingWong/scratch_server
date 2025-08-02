@@ -79,6 +79,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'userdata.today_profit', title: __('今日盈利'), sortable: true, operate: 'BETWEEN'},
                         {field: 'userdata.salary', title: __('工资'), sortable: true, operate: 'BETWEEN'},
                         {field: 'money', title: __('Money'), operate: 'NUMBER', sortable: true, operate: 'BETWEEN'},
+                        {field: 'bonus', title: __('可取金额'), operate: 'NUMBER', sortable: true, operate: 'BETWEEN'},
                         {
                             field: 'userdata.invite_num', 
                             title: __('下级/下级充值'), 
