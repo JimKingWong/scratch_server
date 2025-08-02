@@ -45,7 +45,7 @@ class Goods extends Base
             $map['user_id'] = $this->auth->id;
         }
         $map['cate_id'] = $cate_id;
-        $map['status'] = 0;
+        $map['status'] = 1;
         $is_order = db('order')
             ->where($map)
             ->find() ? 1 : 0;
