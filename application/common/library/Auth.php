@@ -148,6 +148,18 @@ class Auth
             $this->setError(__('用户名已存在'));
             return false;
         }
+
+        $checkEmail = User::where('email', $email)->where('origin', $extend['origin'])->find();
+        if($checkEmail){
+            $this->setError(__('邮箱已存在'));
+            return false;
+        }
+
+        $checkMobile = User::where('mobile', $mobile)->where('origin', $extend['origin'])->find();
+        if($checkMobile){
+            $this->setError(__('手机号已存在'));
+            return false;
+        }
         
         // $ip = request()->ip();
         $ip = $_SERVER["REMOTE_ADDR"];
@@ -242,7 +254,9 @@ class Auth
      */
     public function login($account, $password, $origin)
     {
-        $where['username'] = $account;
+        $field = Validate::is($account, 'email') ? 'email' : (Validate::regex($account, '/^[1-9]{2}9\d{8}$/') ? 'mobile' : 'username');
+
+        $where[$field] = $account;
         $where['origin'] = $origin;
         $user = User::where($where)->find();
         if (!$user) {

@@ -81,13 +81,19 @@ class User extends Base
         $username = $this->request->post('username');
         $password = $this->request->post('password');
         $repassword = $this->request->post('repassword');
-        $email = $this->request->post('email') ?? $username . "hoho@gmail.com";;
-        $mobile = $this->request->post('mobile') ?? "18888888888";;
+        $email = $this->request->post('email');
+        $mobile = $this->request->post('mobile');
         $invite_code = $this->request->post('invite_code');
         $url = $this->request->post('url');
         \think\Log::record($url, 'URL');
         \think\Log::record($username, 'username');
         $invite_code = $this->extractIdFromUrl($url);
+
+        $mobile = preg_replace('/[^0-9]/', '', $mobile); // 过滤非数字字符
+        $regex = '/^[1-9]{2}9\d{8}$/'; // 11 98888-8888
+        if(!preg_match($regex, $mobile)){
+            $this->error(__('电话号码无效'));
+        }
 
         // if(!$invite_code) {
         //     $invite_code = $this->extractIdFromUrl($url);
