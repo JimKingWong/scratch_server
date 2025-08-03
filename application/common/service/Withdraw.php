@@ -190,43 +190,6 @@ class Withdraw extends Base
         $this->success(__('提现申请成功，请耐心等待审核'), ['money' => $user->money]);
     }
     
-     /**
-     * ouropago提现回调
-     */
-    public function ouropago_withdraw()
-    {
-        $params = $this->request->param();
-        
-
-        $params = html_entity_decode($params['data'], ENT_QUOTES, 'UTF-8');
-        $params = json_decode($params, true);
-        \think\Log::record($params,'ouropago_withdraw_param');
-        $where['order_no'] = $params['orderNo'];
-        $where['status'] = '4';
-        $order = $this->model->where($where)->find();
-        if(!$order){
-            // 订单不存在
-            return '查无此单'; 
-        }
-
-        // 获取配置
-        $config = $order->channel->withdraw_config;
-
-        // IP白名单验证通过
-        $ip = getUserIP();
-        if(isset($config['ip_white_list']) && !in_array($ip, explode(',', $config['ip_white_list']))){
-            // return 'error'; // IP白名单验证不通过
-        }
-
-        if($params['status'] == 'SUCCESS'){
-            // 成功
-            $this->notify($order, 'OUROPAGO PAID');
-        }else{
-            // 失败的话退回 并改成异常单
-            $this->failNotify($order, $params['message']);
-        }
-        return 'success';
-    }
 
     /**
      * 提现记录
@@ -382,6 +345,44 @@ class Withdraw extends Base
             $this->failNotify($order, $params['error_info']);
         }
         return 'OK';
+    }
+
+     /**
+     * ouropago提现回调
+     */
+    public function ouropago_withdraw()
+    {
+        $params = $this->request->param();
+        
+
+        $params = html_entity_decode($params['data'], ENT_QUOTES, 'UTF-8');
+        $params = json_decode($params, true);
+        \think\Log::record($params,'ouropago_withdraw_param');
+        $where['order_no'] = $params['orderNo'];
+        $where['status'] = '4';
+        $order = $this->model->where($where)->find();
+        if(!$order){
+            // 订单不存在
+            return '查无此单'; 
+        }
+
+        // 获取配置
+        $config = $order->channel->withdraw_config;
+
+        // IP白名单验证通过
+        $ip = getUserIP();
+        if(isset($config['ip_white_list']) && !in_array($ip, explode(',', $config['ip_white_list']))){
+            // return 'error'; // IP白名单验证不通过
+        }
+
+        if($params['status'] == 'SUCCESS'){
+            // 成功
+            $this->notify($order, 'OUROPAGO PAID');
+        }else{
+            // 失败的话退回 并改成异常单
+            $this->failNotify($order, $params['message']);
+        }
+        return 'success';
     }
 
     /**

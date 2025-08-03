@@ -556,7 +556,7 @@ class User extends Base
 
         $recharge = db('recharge')->where('user_id', $user->id)->field('id,order_no,money,status,paytime,createtime')->select();
         foreach($recharge as $key=>$val){
-            $val['status_text'] = $val['status'] == 0 ? __('未支付') : __('已支付');
+            $val['status_text'] = $val['status'] == 0 ? __('待支付') : __('已支付');
             $val['flag'] = 'Depósitos';
             $recharge[$key] = $val;
         }

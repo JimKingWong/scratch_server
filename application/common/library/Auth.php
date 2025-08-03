@@ -314,7 +314,7 @@ class Auth
     public function changepwd($newpassword, $oldpassword = '', $ignoreoldpassword = false)
     {
         if (!$this->_logined) {
-            $this->setError('You are not logged in');
+            $this->setError(__('你当前还未登录'));
             return false;
         }
         //判断旧密码是否正确
@@ -336,7 +336,7 @@ class Auth
             }
             return true;
         } else {
-            $this->setError('Password is incorrect');
+            $this->setError(__('密码不正确'));
             return false;
         }
     }

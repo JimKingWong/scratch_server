@@ -50,7 +50,6 @@ class Game extends Base
             $this->success(__('您本次已购买过该游戏'), $retval);
         }
 
-        
         if($user->money < $cate->price){
             $this->error(__('余额不足'));
         }
@@ -66,7 +65,7 @@ class Game extends Base
         if(!$is_lock){
             // 释放锁
             // $redis->del($lock_key);
-            $this->error(__('请勿重复提交'));
+            $this->error(__('系统繁忙, 请稍后再试'));
         }
 
         $winItem = db('goods_cate')->where('cate_id', $cate_id)->field('id,name,price,odds,is_win,image')->select();
@@ -218,7 +217,7 @@ class Game extends Base
         if(!$is_lock){
             // 释放锁
             // $redis->del($lock_key);
-            $this->error(__('请勿重复提交'));
+            $this->error(__('系统繁忙, 请稍后再试'));
         }
 
         if($is_lock){

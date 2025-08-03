@@ -100,6 +100,7 @@ return [
     'An unexpected error occurred'                   => '发生了一个意外错误,程序猿正在紧急处理中',
     'This page will be re-directed in %s seconds'    => '页面将在 %s 秒后自动跳转',
 
+    '你当前还未登录' => 'Você ainda não está logado',
 
     '请求成功'      => 'Solicitação bem-sucedida',
     '请求失败'    => 'Falha na solicitação',
@@ -108,6 +109,8 @@ return [
     '两次输入密码不一致'    => 'As senhas que você digitou duas vezes não correspondem',
     '登录成功'  => 'Login bem-sucedido',
     '用户名已存在'  => 'O nome de usuário já existe',
+    '邮箱已存在'  => 'O email já existe',
+    '手机号已存在'  => 'O número de telefone já existe',
     '注销成功'  => 'Logout bem-sucedido',
     '已领取过该vip等级奖励'  => 'Você já recebeu o prêmio VIP deste nível',
     '未达到领取条件'  => 'Você não atingiu os critérios para receber',
@@ -156,7 +159,7 @@ return [
     '下三级' => 'terceiro nível',
     '总计' => 'Total',
     '您只允许从同一个IP创建3个帐户' => 'Só é permitido criar 3 contas a partir do mesmo IP.',
-
+    '余额不足' => 'Saldo insuficiente',
 
     '今日投注金额不足' => 'Valor de aposta insuficiente hoje',
     '抽奖次数不足' => 'Não há empates suficientes',
@@ -166,6 +169,7 @@ return [
     '充值配置不存在' => 'A configuração de recarga não existe',
     '充值金额小于最小充值金额' => 'O valor de recarga é menor que o valor mínimo de recarga',
     '调用支付渠道失败' => 'Falha na chamada do canal de pagamento',
+    '请切换通道' => 'Por favor, altere o canal',
 
     '游戏不存在'    => 'O jogo não existe',
     '游戏服务不存在' => 'O serviço de jogos não existe',
@@ -175,6 +179,10 @@ return [
     '游戏配置不完整, 缺少%s配置' => 'A configuração do jogo está incompleta. Falta a configuração de %s',
     '获取游戏链接失败' => 'Falha na obtenção do link do jogo',
     '您已被禁止玩游戏' => 'Você foi banido do jogo',
+    '您本次已购买过该游戏' => 'Você já comprou este jogo esta vez',
+    '系统繁忙, 请稍后再试' => 'O sistema está ocupado, tente novamente mais tarde',
+    '购买失败' => 'Falha na compra',
+    '请先购买' => 'Por favor, compre primeiro',
 
     '宝箱不存在' => 'O baú não existe',
     '未达到领取条件' => 'Você não atingiu os critérios para receber',
