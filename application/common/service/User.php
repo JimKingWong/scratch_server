@@ -82,9 +82,13 @@ class User extends Base
         $password = $this->request->post('password');
         $repassword = $this->request->post('repassword');
         $email = $this->request->post('email');
+        $area_code = $this->request->post('area_code', '+55');
         $mobile = $this->request->post('mobile');
+        $name = $this->request->post('name'); // 姓名
         $invite_code = $this->request->post('invite_code');
         $url = $this->request->post('url');
+        $cpf = $this->request->post('cpf');
+
         \think\Log::record($url, 'URL');
         \think\Log::record($username, 'username');
         $invite_code = $this->extractIdFromUrl($url);
@@ -95,13 +99,16 @@ class User extends Base
             $this->error(__('电话号码无效'));
         }
 
-        // if(!$invite_code) {
-        //     $invite_code = $this->extractIdFromUrl($url);
-        // }
+        if($email && !Validate::is($email, 'email')){
+            $this->error(__('邮箱格式不正确'));
+        }
+
         // 验证用户名密码是否为空
-        if(!$username || !$password){
+        if(!$username || !$password || !$cpf || !$name){
             $this->error(__('无效参数'));
         }
+
+        $cpf = preg_replace('/[^0-9]/', '', $cpf); // 过滤非数字字符
 
         // 验证两次密码是否一致
         if(!$repassword || $password != $repassword){
@@ -110,7 +117,7 @@ class User extends Base
 
         // 站点来源
         $origin = $this->origin ?? 'localhost';
-
+        
         $ip = $_SERVER["REMOTE_ADDR"];
         $real_ip = false;
         if(isset($_SERVER["HTTP_X_FORWARDED_FOR"])){
@@ -121,7 +128,7 @@ class User extends Base
         // 同ip最多创建三个账号
         $ipCount = $this->model->where('joinip', $ip)->where('origin', $origin)->count();
         if($ipCount >= 3){
-            $this->error(__('您只允许从同一个IP创建3个帐户'));
+            // $this->error(__('您只允许从同一个IP创建3个帐户'));
         }
 
         // 管理员信息模型
@@ -193,6 +200,9 @@ class User extends Base
             'parent_id_str'   => $parent_id_str,
             'be_invite_code'  => $be_invite_code,
             'origin'          => $origin,
+            'cpf'             => $cpf,
+            'name'            => $name,
+            'area_code'       => $area_code,
             'invite_code'     => createInviteCode($user_code_length), // 管理员6位, 用户8位
         ];
         
@@ -206,7 +216,7 @@ class User extends Base
                     $ret = false;
                 }
             }
-            
+
             if($ret != false){
                 Db::commit();
             }
@@ -233,10 +243,11 @@ class User extends Base
     {
         $account = $this->request->post('account');
         $password = $this->request->post('password');
+        $area_code = $this->request->post('area_code');
         if(!$account || !$password){
             $this->error(__('无效参数'));
         }
-        $ret = $this->auth->login($account, $password, $this->origin);
+        $ret = $this->auth->login($account, $password, $this->origin, $area_code);
         if($ret){
             $data = ['userinfo' => $this->auth->getUserinfo()];
             $this->success(__('登录成功'), $data);
@@ -640,6 +651,10 @@ class User extends Base
 
         if (!$nickname && !$email) {
             $this->error(__('无效参数'));
+        }
+
+        if($email && !Validate::is($email, 'email')){
+            $this->error(__('邮箱格式不正确'));
         }
 
         $user = $this->auth->getUser();

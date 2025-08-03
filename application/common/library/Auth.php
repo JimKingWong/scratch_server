@@ -252,10 +252,13 @@ class Auth
      * @param string $password 密码
      * @return boolean
      */
-    public function login($account, $password, $origin)
+    public function login($account, $password, $origin, $area_code = '+55')
     {
         $field = Validate::is($account, 'email') ? 'email' : (Validate::regex($account, '/^[1-9]{2}9\d{8}$/') ? 'mobile' : 'username');
 
+        if($field == 'mobile'){
+            $where['area_code'] = $area_code;
+        }
         $where[$field] = $account;
         $where['origin'] = $origin;
         $user = User::where($where)->find();

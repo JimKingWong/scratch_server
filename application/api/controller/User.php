@@ -51,6 +51,7 @@ class User extends Api
      * @ApiMethod (POST)
      * @ApiParams (name="account", type="string", required=true, description="账号")
      * @ApiParams (name="password", type="string", required=true, description="密码")
+     * @ApiParams (name="area_code", type="string", required=true, description="区号")
      */
     public function login()
     {
