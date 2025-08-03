@@ -73,7 +73,7 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('RTP设置')}:</label>
         <div class="col-xs-12 col-sm-6">
             <input id="c-rtp" class="form-control" name="row[rtp]" type="number" value="{$row.rtp|htmlentities}" placeholder="RTP" min="0">
-            <p class="text-red">请输入0-1的数字, 值越高, 用户收益越高(同时商品设置的概率也影响收益), 可通过测试看收益信息</p>
+            <p class="text-red">请输入0-1的数字, 值越高, 用户收益越高, 如商品概率有调整过, 需重新设置该值, 可通过测试看收益信息</p>
         </div>
         <button type="button" class="btn btn-danger btn-embossed rtp" data-ids="{$row.id}">测试万次RTP</button>
     </div>
