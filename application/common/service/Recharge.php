@@ -106,7 +106,7 @@ class Recharge extends Base
         $where['user_id'] = $user->id;
         $list = $this->model->where($where)->field($fields)->order('id desc')->select();
         foreach($list as $val){
-            $val->status_text = $val->status == 0 ? __('未支付') : __('已支付');
+            $val->status_text = $val->status == 0 ? __('待支付') : __('已支付');
         }
 
         $retval = [
