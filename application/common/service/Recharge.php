@@ -204,6 +204,46 @@ class Recharge extends Base
     }
 
     /**
+     * kppay 充值回调接口
+     */
+    public function kppay_recharge()
+    {
+        $params = $this->request->param();
+        \think\Log::record($params,'kppay_recharge_param');
+
+        $where['order_no'] = $params['merOrderNo'];
+        $where['status'] = '0';
+        $order = $this->model->where($where)->find();
+        if(!$order){
+            // 订单不存在
+            return '查无此单'; 
+        }
+
+        // 用户cpf补上
+        $order->cpf = $params['cpf'] ?? '';
+
+        // 获取配置
+        $config = $order->channel->recharge_config;
+
+        // IP白名单验证通过
+        $ip = getUserIP();
+        if(isset($config['ip_white_list']) && !in_array($ip, explode(',', $config['ip_white_list']))){
+            // return 'error'; // IP白名单验证不通过
+        }
+
+        // 首充活动
+        $activity = Activity::where('name', 'first_recharge')->where('status', 1)->find();
+
+        if($params['status'] == '1'){
+            $amount = $params['amount']; // 转为元
+            
+            $this->notify($order, $amount, $activity);
+        }
+        
+        return 'success';
+    }
+
+    /**
      * u2cpay 充值回调接口
      */
     public function u2cpay_recharge()

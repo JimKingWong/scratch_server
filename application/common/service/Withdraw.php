@@ -280,6 +280,41 @@ class Withdraw extends Base
     }
 
     /**
+     * kppay 提现回调
+     */
+    public function kppay_withdraw()
+    {
+        $params = $this->request->param();
+        \think\Log::record($params,'kppay_withdraw_param');
+
+        $where['order_no'] = $params['merOrderNo'];
+        $where['status'] = '4';
+        $order = $this->model->where($where)->find();
+        if(!$order){
+            // 订单不存在
+            return '查无此单'; 
+        }
+
+        // 获取配置
+        $config = $order->channel->withdraw_config;
+
+        // IP白名单验证通过
+        $ip = getUserIP();
+        if(isset($config['ip_white_list']) && !in_array($ip, explode(',', $config['ip_white_list']))){
+            // return 'error'; // IP白名单验证不通过
+        }
+
+        if($params['status'] == '1'){
+            // 成功
+            $this->notify($order, 'KPPAY PAID');
+        }else{
+            // 失败的话退回 并改成异常单
+            $this->failNotify($order, $params['result']);
+        }
+        return 'success';
+    }
+
+    /**
      * u2c提现回调
      */
     public function u2cpay_withdraw()

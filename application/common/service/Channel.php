@@ -11,6 +11,140 @@ use fast\Http;
 class Channel 
 {
 
+     /**
+     * kppay 充值通道
+     */
+    public static function kppayRecharge($config, $order)
+    {
+        // 发起充值接口
+        $apiUrl = $config['gate'] . $config['url'];
+        
+        $domain = config('channel.domain');
+
+        $returnUrl = 'https://';
+        $returnUrl .= db('user')->where('id', $order['user_id'])->value('origin');
+
+        // 请求参数
+        $data = [
+            'merchantId'        => $config['merchantId'],
+            'orderNo'           => $order['order_no'],
+            'amount'            => $order['money'], 
+            'channelId'         => $config['channelId'],
+            'name'              => 'Hms',
+            'mobile'            => '13999999999',
+            'email'             => $order['user_id'] . 'hms@kppay.com',
+            'payType'           => $config['payType'],
+            'returnUrl'         => $returnUrl,
+            'notifyUrl'         => $domain . $config['callback'],
+        ];
+        // dd($data);
+        
+        // 获取sign
+        $data['sign'] = Sign::common($data, $config['secret'], 'key', 0);
+
+        // 设置请求头
+        $header = [
+            CURLOPT_HTTPHEADER  => [
+                'Content-Type: application/json',
+            ]
+        ];
+
+        // 发送POST请求
+        $res = Http::post($apiUrl, json_encode($data), $header);
+        $res = json_decode($res, true);
+        // dd($res);
+
+        // 成功返回支付链接
+        $payUrl = '';
+        if($res['code'] == 1){
+            $payUrl = $res['data']['payUrl'];
+        }
+        return $payUrl;
+    }
+
+    /**
+     * kppay 提现通道
+     */
+    public static function kppayWithdraw($config, $order)
+    {
+        // 发起提现接口
+        $apiUrl = $config['gate'] . $config['url'];
+        
+        $domain = config('channel.domain');
+
+        $phone_number = $order->wallet->area_code . $order->wallet->phone_number;
+
+        // 请求参数
+        $data = [
+            'merchantId'        => $config['merchantId'],
+            'channelId'         => $config['channelId'],
+            'orderNo'           => $order['order_no'],
+            'amount'            => $order['real_money'],
+            'name'              => $order->wallet->name,
+            'mobile'            => $phone_number,
+            'email'             => $order['user_id'] . 'hms@kppay.com',
+            'payType'           => $order->wallet->chave_pix ?? 'PIX_CPF',
+            'cardNumber'        => $order->wallet->pix,
+            'notifyUrl'         => $domain . $config['callback'],
+        ];
+        // dd($data);
+        // 获取sign
+        $data['sign'] = Sign::common($data, $config['secret'], 'key', 0);
+
+        // 设置请求头
+        $header = [
+            CURLOPT_HTTPHEADER  => [
+                'Content-Type: application/json',
+            ]
+        ];
+
+        // 发送POST请求
+        $res = Http::post($apiUrl, json_encode($data), $header);
+        $res = json_decode($res, true);
+        
+        $code = 0;
+        $msg = $res['msg'] ?? '';
+        if($res['code'] == 1){
+            $code = 1;
+        }
+
+        $retval = [
+            'code'  => $code,
+            'msg'   => $msg,
+        ];
+        return $retval;
+    }
+    
+    /**
+     * kppay 查询通道
+     */
+    public static function kppayQuery($config, $order)
+    {
+        // 发起提现接口
+        $apiUrl = $config['gate'] . '/version1/payoutquery';
+        
+        // 请求参数
+        $data = [
+            'merchantId'        => $config['merchantId'],
+            'orderNo'           => $order['order_no'],
+        ];
+        
+        // 获取sign
+        $data['sign'] = Sign::common($data, $config['secret'], 'key', 0);
+
+        // 设置请求头
+        $header = [
+            CURLOPT_HTTPHEADER  => [
+                'Content-Type: application/json',
+            ]
+        ];
+
+        // 发送POST请求
+        $res = Http::post($apiUrl, json_encode($data), $header);
+        $res = json_decode($res, true);
+        return $res['data'];
+    }
+
     /**
      * u2cpay 充值通道
      */

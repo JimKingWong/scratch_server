@@ -14,6 +14,26 @@ class Channel extends Api
     protected $noNeedLogin = ['*'];
     protected $noNeedRight = ['*'];
 
+     /**
+     * kppay 充值回调
+     */
+    public function kppay_recharge()
+    {
+        $service = new \app\common\service\Recharge();
+        // 控制器返回
+        return $service->kppay_recharge();
+    }
+
+    /**
+     * kppay 提现回调
+     */
+    public function kppay_withdraw()
+    {
+        $service = new \app\common\service\Withdraw();
+        // 控制器返回
+        return $service->kppay_withdraw();
+    }
+
     /**
      * u2c充值回调
      */
