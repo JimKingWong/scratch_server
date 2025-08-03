@@ -61,8 +61,6 @@ class Game extends Base
         return $goodscate;
     }
 
-    
-
     /**
      * 购买
      */
@@ -95,23 +93,11 @@ class Game extends Base
 
         $order_no = date('YmdHis') . mt_rand(100000, 999999);
 
-        $redis = Cache::store('redis')->handler();
-        // 并发处理
-        $lock_key = 'buy:lock_' . $this->auth->id;
-
-        $is_lock = $redis->setnx($lock_key, 1); // 加锁
-
-        if(!$is_lock){
-            // 释放锁
-            // $redis->del($lock_key);
-            $this->error(__('系统繁忙, 请稍后再试'));
-        }
-
         $winItem = db('goods_cate')->where('cate_id', $cate_id)->field('id,name,price,odds,is_win,image')->select();
 
         // rtp处理
         $winItem = $this->rtp($cate, $winItem);
-
+        
         $arr = [];
         $goods = [];
         foreach($winItem as $v){
@@ -126,6 +112,12 @@ class Game extends Base
 
         // 获取九宫格
         $grid = $this->getGoodsGrid($cate_id, $goods);
+
+        $redis = Cache::store('redis')->handler();
+        // 并发处理
+        $lock_key = 'buy:lock_' . $this->auth->id;
+
+        $is_lock = $redis->setnx($lock_key, 1); // 加锁
         
         if($is_lock){
             $result = false;
@@ -255,12 +247,6 @@ class Game extends Base
         $lock_key = 'play:lock_' . $this->auth->id;
 
         $is_lock = $redis->setnx($lock_key, 1); // 加锁
-        // dd($is_lock);
-        if(!$is_lock){
-            // 释放锁
-            // $redis->del($lock_key);
-            $this->error(__('系统繁忙, 请稍后再试'));
-        }
 
         if($is_lock){
             $result = false;
