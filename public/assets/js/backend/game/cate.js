@@ -58,23 +58,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Table.api.events.operate,
                             formatter: Table.api.formatter.operate,
                             buttons: [
-                                // {
-                                //     name: 'RTP',
-                                //     title: __('测试RTP'),
-                                //     text: '测试RTP',
-                                //     classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
-                                //     url: 'game/cate/testrtp',
-                                //     success: function (data, ret) {
-                                //         Layer.alert(ret.msg);
-                                //         //如果需要阻止成功提示，则必须使用return false;
-                                //         return false;
-                                //     },
-                                //     error: function (data, ret) {
-                                //         console.log(data, ret);
-                                //         Layer.alert(ret.msg);
-                                //         return false;
-                                //     }
-                                // },
+                                {
+                                    name: 'RTP',
+                                    title: __('测试RTP'),
+                                    text: '测试RTP',
+                                    classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
+                                    url: 'game/cate/testrtp',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    }
+                                },
                                 {
                                     name: 'copy',
                                     title: __('复制'),
