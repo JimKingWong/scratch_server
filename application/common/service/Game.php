@@ -25,6 +25,45 @@ class Game extends Base
     }
 
     /**
+     * 游戏rtp算法
+     */
+    public function rtp($cate, $goodscate)
+    {
+        $targetRtp = $cate->rtp;
+        $price = $cate->price;
+
+        // 计算当前RTP和总权重
+        $totalOdds = 0;
+        $currentRtp = 0;
+
+        foreach($goodscate as $val){
+            $totalOdds += $val['odds'];
+            $currentRtp += $val['odds'] * $val['price'];
+        }
+
+        // 计算未中奖所需权重
+        $noneWeight = ($currentRtp - $targetRtp * $price * $totalOdds) / ($targetRtp * $price - 0); // 未中奖价值为0
+
+        // 重构奖品池 (未中奖的概率重新设置)
+        foreach($goodscate as $key => $val){
+            if($val['is_win'] == 0){
+                $goodscate[$key]['odds'] = max(0, $noneWeight);
+            }
+        }
+        // 计算总权重
+        $totalOdds = array_sum(array_column($goodscate, 'odds'));
+
+        foreach($goodscate as &$item){
+            $item['odds'] = sprintf('%.4f', $item['odds'] / $totalOdds);
+            $item['cur_rtp'] = sprintf('%.4f', $item['odds'] * $price);
+        }             
+
+        return $goodscate;
+    }
+
+    
+
+    /**
      * 购买
      */
     public function buy()
@@ -40,7 +79,7 @@ class Game extends Base
 
         $check_order = db('order')->where('cate_id', $cate_id)->where('user_id', $this->auth->id)->where('status', 1)->field('id,order_no,grid')->find();
         
-        if ($check_order) {
+        if($check_order){
             $retval = [
                 'order_no' => $check_order['order_no'],
                 'money'    => number_format($user->money, 2),
@@ -69,6 +108,9 @@ class Game extends Base
         }
 
         $winItem = db('goods_cate')->where('cate_id', $cate_id)->field('id,name,price,odds,is_win,image')->select();
+
+        // rtp处理
+        $winItem = $this->rtp($cate, $winItem);
 
         $arr = [];
         $goods = [];
@@ -336,4 +378,62 @@ class Game extends Base
 
         return $grid;
     }
+
+    /**
+     * 测试RTP
+     */
+    public function testRtp($cate_id = null, $rtp = null)
+    {
+        $cate_id = $this->request->post('cate_id') ?: $cate_id;
+
+        $cate = Cate::where('id', $cate_id)->find();
+        if($rtp > 0){
+            $cate->rtp = $rtp;
+        }
+
+        $winItem = db('goods_cate')->where('cate_id', $cate_id)->field('id,name,price,odds,is_win,image')->select();
+        
+        // rtp处理
+        $winItem = $this->rtp($cate, $winItem);
+        
+        $arr = [];
+        $goods = [];
+        foreach($winItem as $v){
+            $arr[$v['id']] = $v['odds'] * 10000;
+            $goods[$v['id']] = $v;
+        }
+        
+        $total = 10000;
+        $sum = 0;
+
+        for($i=0; $i < $total; $i ++){
+            $goods_id = Random::lottery($arr);
+            $sum += $goods[$goods_id]['price'];
+        }
+
+        // 投入
+        $price = $cate->price;
+        // 总投入
+        $total_price = $total * $price;
+        // 实际RTP
+        $actualRtp = $sum / $total_price;
+        
+        $retval = [
+            'total'       => $total,
+            'total_price' => $total_price,
+            'sum'         => $sum,
+            'curRtp'      => $cate->rtp,
+            'actualRtp'   => $actualRtp,
+        ];
+
+        if($this->request->post('cate_id')){
+            echo "测试次数: {$total}次\n";
+            echo "用户总投入: {$total_price}元\n";
+            echo "用户抽奖总收益: {$sum}元\n";
+            echo "当前设置RTP: " . round($cate->rtp * 100, 2) . "%";
+            echo "实际RTP: " . round($actualRtp * 100, 2) . "%";
+        }
+        return $retval;
+    }
+    
 }

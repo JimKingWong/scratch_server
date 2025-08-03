@@ -87,6 +87,7 @@ class Cate extends Backend
             $list = array_values($list);
             foreach($list as $v){
                 $v['name']=preg_replace("/(\s|\&nbsp\;|　|\xc2\xa0)/", " ", strip_tags($v['name'])); //过滤空格
+                $v['total_odds'] = db('goods_cate')->where('cate_id',$v['id'])->sum('odds');
             }
 
             $total = count($list);
@@ -98,6 +99,29 @@ class Cate extends Backend
         $this->assignconfig('cate_id', $cate_id);
         $this->assign('cate_id', $cate_id);
         return $this->view->fetch();
+    }
+
+    /**
+     * 测试RTP
+     */
+    public function testrtp($ids = null)
+    {
+        $service = new \app\common\service\Game();
+
+        $rtp = $this->request->post('rtp');
+        if($rtp < 0 || $rtp > 1){
+            $this->error('RTP值范围0-1');
+        }
+        $retval = $service->testrtp($ids, $rtp);
+
+        $msg = '当前为万次抽奖测试结果(仅供参考)' . "<br>";
+        $msg .= "测试次数: {$retval['total']}次\n" . "<br>";
+        $msg .= "用户总投入: {$retval['total_price']}元\n". "<br>";
+        $msg .= "用户抽奖总收益: {$retval['sum']}元\n". "<br>";
+        $msg .= "当前设置RTP: " . round($retval['curRtp'] * 100, 2) . "%\n". "<br>";
+        $msg .= "实际RTP: " . round($retval['actualRtp'] * 100, 2) . "%\n". "<br>";
+        // dd($retval);
+        $this->success($msg);
     }
 
     /**
@@ -303,6 +327,10 @@ class Cate extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $params = $this->preExcludeFields($params);
+
+        if($params['rtp'] < 0 || $params['rtp'] > 1){
+            $this->error('RTP值范围0-1');
+        }
 
         $result = false;
         Db::startTrans();

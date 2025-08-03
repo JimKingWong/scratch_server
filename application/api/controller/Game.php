@@ -19,15 +19,6 @@ class Game extends Api
     }
 
     /**
-     * 创建游戏
-     */
-    public function create()
-    {
-        $service = new \app\common\service\Game();
-        $service->create();
-    }
-
-    /**
      * 游戏开始
      */
     public function play()
@@ -35,4 +26,15 @@ class Game extends Api
         $service = new \app\common\service\Game();
         $service->play();
     }
+
+    /**
+     * 测试rtp
+     */
+    public function testRtp()
+    {
+        $service = new \app\common\service\Game();
+        $service->testRtp();
+    }
+
+
 }

@@ -39,6 +39,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'image', title: __('Image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
                         {field: 'status', title: __('Status'), searchList: {"0":__('Status 0'),"1":__('Status 1')}, formatter: Table.api.formatter.toggle},
                         {field: 'price', title: __('价格'), operate: false},
+                        {field: 'total_odds', title: __('当前总概率'), operate: false},
+                        {field: 'rtp', title: __('RTP'), operate: false},
                         {field: 'weigh', title: __('Weigh'), operate: false},
                         {
                             field: 'id',
@@ -56,6 +58,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Table.api.events.operate,
                             formatter: Table.api.formatter.operate,
                             buttons: [
+                                // {
+                                //     name: 'RTP',
+                                //     title: __('测试RTP'),
+                                //     text: '测试RTP',
+                                //     classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
+                                //     url: 'game/cate/testrtp',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         console.log(data, ret);
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     }
+                                // },
                                 {
                                     name: 'copy',
                                     title: __('复制'),
@@ -214,6 +233,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         edit: function () {
+            $(document).on("click", ".rtp", function(){
+                let ids = $(this).data('ids');
+
+                let rtp = $('#c-rtp').val();
+                // console.log(ids);
+                Fast.api.ajax({
+                    url: 'game/cate/testrtp',
+                    data: {ids: ids, rtp: rtp},
+                }, function(data, ret){
+                    Layer.alert(ret.msg);
+                    return false;
+                })
+            })
             Controller.api.bindevent();
         },
         api: {
