@@ -621,3 +621,12 @@ function dealUsername($username)
 
     return $username;
 }
+
+/**
+ * 是否包含中文
+ */
+function containsChinese($str) 
+{
+    // 匹配任意位置出现一个中文字符即返回 true
+    return preg_match('/[\x{4e00}-\x{9fa5}]/u', $str);
+}

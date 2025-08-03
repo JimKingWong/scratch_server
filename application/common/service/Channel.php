@@ -28,7 +28,7 @@ class Channel
         $data = [
             'merchantId'        => $config['merchantId'],
             'orderNo'           => $order['order_no'],
-            'amount'            => $order['money'], 
+            'amount'            => sprintf('%.2f', $order['money']), 
             'channelId'         => $config['channelId'],
             'name'              => 'Hms',
             'mobile'            => '13999999999',
@@ -79,7 +79,7 @@ class Channel
             'merchantId'        => $config['merchantId'],
             'channelId'         => $config['channelId'],
             'orderNo'           => $order['order_no'],
-            'amount'            => $order['real_money'],
+            'amount'            => sprintf('%.2f', $order['real_money']),
             'name'              => $order->wallet->name,
             'mobile'            => $phone_number,
             'email'             => $order['user_id'] . 'hms@kppay.com',
