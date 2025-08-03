@@ -646,10 +646,10 @@ class User extends Base
      */
     public function personinfo()
     {
-        $nickname = $this->request->post("nickname");
+        $name = $this->request->post("name");
         $email = $this->request->post("email");
 
-        if (!$nickname && !$email) {
+        if (!$name && !$email) {
             $this->error(__('无效参数'));
         }
 
@@ -658,7 +658,7 @@ class User extends Base
         }
 
         $user = $this->auth->getUser();
-        $user->nickname = $nickname;
+        $user->name = $name;
         $user->email = $email;
         $user->save();
 
