@@ -554,14 +554,14 @@ class User extends Base
     {
         $user = $this->auth->getUser();
 
-        $recharge = db('recharge')->where('user_id', $user->id)->field('id,order_no,money,status,paytime,createtime')->select();
+        $recharge = db('recharge')->where('user_id', $user->id)->field('id,order_no,money,status,paytime,createtime')->order('id desc')->select();
         foreach($recharge as $key=>$val){
             $val['status_text'] = $val['status'] == 0 ? __('待支付') : __('已支付');
             $val['flag'] = 'Depósitos';
             $recharge[$key] = $val;
         }
 
-        $withdraw = db('withdraw')->where('user_id', $user->id)->field('id,order_no,money,real_money,status,paytime,createtime')->select();
+        $withdraw = db('withdraw')->where('user_id', $user->id)->field('id,order_no,money,real_money,status,paytime,createtime')->order('id desc')->select();
         $arr = [__('审核中'), __('提现成功'), __('拒绝'), __('提现失败'), __('异常')];
         foreach($withdraw as $key=>$val){
             $val['status_text'] = $arr[$val['status']];
