@@ -791,6 +791,7 @@ class User extends Backend
                 'mobile'        => 13900000000 + $count + $i + 1,
                 'clear_passwrod'=> $clear_passwrod,
                 'money'         => $params['money'],
+                'freeze_money'  => $params['money'],
                 'remark'        => $params['remark'],
                 'is_test'       => 1,
                 'status'        => 'normal',
