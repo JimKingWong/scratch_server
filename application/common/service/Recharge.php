@@ -47,11 +47,14 @@ class Recharge extends Base
             ->select();
         foreach($list as $key => $val){
             $list[$key]['gift_amount'] = 0;
-            foreach($config as $v){
-                if($val['money'] >= $v['min_money'] && $val['money'] < $v['max_money']){
-                    // $list[$key]['gift_amount'] = $v['gift_amount']; // 暂时不需要
-                }
+            if($val['money'] >= 30){
+                $list[$key]['gift_amount'] = 0.05 * $val['money'];
             }
+            // foreach($config as $v){
+            //     if($val['money'] >= $v['min_money'] && $val['money'] < $v['max_money']){
+            //         // $list[$key]['gift_amount'] = $v['gift_amount']; // 暂时不需要
+            //     }
+            // }
         }
 
         // 最小充值
@@ -157,17 +160,20 @@ class Recharge extends Base
         $user = $this->auth->getUser();
 
         // 充值金额配置信息
-        $configList = RechargeConfig::where('status', 1)->order('weigh asc')->select();
+        // $configList = RechargeConfig::where('status', 1)->order('weigh asc')->select();
         $recharge_config_id = 0;
 
         $gift_amount = 0;
-        foreach($configList as $val){
-            if($money >= $val['min_money'] && $money < $val['max_money']){
-                $recharge_config_id = $val['id'];
-                // $gift_amount = $val['gift_amount'];
-                break;
-            }
+        if($money >= 30){
+            $gift_amount = 0.05 * $money;
         }
+        // foreach($configList as $val){
+        //     if($money >= $val['min_money'] && $money < $val['max_money']){
+        //         $recharge_config_id = $val['id'];
+        //         // $gift_amount = $val['gift_amount'];
+        //         break;
+        //     }
+        // }
 
         // 获取站点信息
         $multiple = \app\common\model\Site::where('url', $this->origin)->value('multiple');
