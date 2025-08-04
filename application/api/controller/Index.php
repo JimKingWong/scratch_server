@@ -27,7 +27,7 @@ class Index extends Api
     /**
      * 部署第一步
      */
-    private function startup()
+    public function startup()
     {
         // 创建es
         $service = new \app\common\service\util\Startup;
@@ -35,7 +35,7 @@ class Index extends Api
         // $service::createEs();
 
         // 清理数据库数据
-        // $service::clearData();
+        $service::clearData();
 
     }
 

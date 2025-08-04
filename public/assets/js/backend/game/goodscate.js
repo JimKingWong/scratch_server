@@ -55,8 +55,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var filter = JSON.parse(params.filter);
                     var op = JSON.parse(params.op);
                     //这里可以动态赋值，比如从URL中获取admin_id的值，filter.admin_id=Fast.api.query('admin_id');
-                    filter.cate_id = Config.cate_id;
-                    op.cate_id = "=";
+                    if(Config.cate_id){
+                        filter.cate_id = Config.cate_id;
+                        op.cate_id = "=";
+                    }
                     params.filter = JSON.stringify(filter);
                     params.op = JSON.stringify(op);
                     return params;

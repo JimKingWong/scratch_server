@@ -131,10 +131,10 @@ class Startup
 
         // 需要截断表的
         $needClear = [
-            'admin_log', 'box_record', 'daybookadmin', 'daybookblogger', 'letter', 'letter_read', 
-            'mydata', 'prize_log', 'recharge', 'user', 'user_collect_log', 'user_data', 'user_info',
-            'user_money_log', 'user_reward_log', 'user_setting', 'user_signin_log', 'user_turntable_log',
-            'user_vip_log', 'user_wallet', 'withdraw'
+            'admin_log', 'daybookadmin', 'daybookblogger', 'letter', 'letter_read', 
+            'mydata', 'recharge', 'user', 'user_data', 'user_info',
+            'user_money_log', 'user_reward_log', 'user_setting',
+            'user_wallet', 'withdraw'
         ];
         foreach($needClear as $v){
             Db::query('TRUNCATE TABLE ' . $prefix . $v);
@@ -158,14 +158,6 @@ class Startup
             }
         }
         Db::execute("ALTER TABLE ga_site AUTO_INCREMENT = 2");
-
-        // 转盘数据
-        $turntable = model('Turntable')->select();
-        foreach($turntable as $v){
-            $v->num = 0;
-            $v->left = $v->total;
-            $v->save();
-        }
         
     }
 }
