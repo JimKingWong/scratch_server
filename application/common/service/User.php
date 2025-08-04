@@ -600,7 +600,7 @@ class User extends Base
 
         $retval = [
             'money'             => number_format($user->money),
-            'freeze_money'      => number_format($user->money - $user->bonus),
+            'freeze_money'      => number_format($user->freeze_money),
             'bonus'             => number_format($user->bonus),
             'record'            => $record,
             'recharge'          => $recharge,
