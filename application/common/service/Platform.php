@@ -4,6 +4,7 @@ namespace app\common\service;
 
 use app\common\model\Cate;
 use app\common\model\Custservice;
+use app\common\service\util\Sign;
 use think\Cache;
 use think\Db;
 
@@ -42,8 +43,12 @@ class Platform extends Base
         if(count($record) < 20){
             // 中奖记录比较少时, 用假数据
             $game_goods = db('goods_cate')->where('status', 1)->cache(true, 3600)->field('name,price,image')->orderRaw("rand()")->limit(20)->select();
+            $userinfo = 0;
+            if(!empty($users)){
+                $userinfo = array_rand($users);
+            }
             foreach($game_goods as $val){
-                $awards[$k]['username'] = isset($users[array_rand($users)]) ? dealUsername($users[array_rand($users)]) : dealUsername('unknown');
+                $awards[$k]['username'] = isset($users[$userinfo]) ? dealUsername($users[$userinfo]) : dealUsername(Sign::generateTraceId(8));
                 $awards[$k]['goods_name'] = $val['name'];
                 $awards[$k]['goods_price'] = $val['price'];
                 $awards[$k]['goods_image'] = $val['image'] ? cdnurl($val['image']) : '';

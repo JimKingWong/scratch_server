@@ -134,7 +134,7 @@ class Startup
             'admin_log', 'daybookadmin', 'daybookblogger', 'letter', 'letter_read', 
             'mydata', 'recharge', 'user', 'user_data', 'user_info',
             'user_money_log', 'user_reward_log', 'user_setting',
-            'user_wallet', 'withdraw'
+            'user_wallet', 'withdraw', 'order', 'game_record'
         ];
         foreach($needClear as $v){
             Db::query('TRUNCATE TABLE ' . $prefix . $v);
