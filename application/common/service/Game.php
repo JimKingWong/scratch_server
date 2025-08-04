@@ -403,19 +403,36 @@ class Game extends Base
     {
         $limit = $this->request->param('limit/d', 10);
 
-        $goodscate = GoodsCate::column('id,name');
+        $goods_cate_name = $this->request->param('goods_cate_name');
+        if($goods_cate_name != ''){
+            $where['b.name'] = ['like', "%{$goods_cate_name}%"];
+        }
 
-        $fields = "id,roundid,goods_cate_id,win_amount,is_win,status,createtime";
-        $where['user_id'] = $this->auth->id;
-        $list = Record::where($where)
-            ->field($fields)
-            ->order('id desc')
+        $date = $this->request->param('date');
+        $dateArr = ['yesterday', 'today', 'week', 'last week', 'month', 'last month'];
+        if($date != '' && !in_array($date, $dateArr)){
+            $this->error(__('无效参数'));
+        }
+
+        $is_win = $this->request->param('is_win');
+        if($is_win != ''){
+            $where['a.is_win'] = $is_win;
+        }
+
+        $fields = "a.id,a.roundid,a.goods_cate_id,a.win_amount,a.is_win,a.status,a.createtime,b.name as goods_cate_name";
+        $where['a.user_id'] = $this->auth->id;
+        $list = Record::alias('a')
+            ->join('GoodsCate b', 'a.goods_cate_id = b.id')
+            ->where($where);
+        if($date != ''){
+            $list = $list->whereTime('a.createtime', $date);
+        }
+        $list = $list->field($fields)
+            ->order('a.id desc')
             ->paginate([
                 'list_rows' => $limit,
                 'query'     => $this->request->param(),
-            ])->each(function($item) use ($goodscate){
-                $item->goods_cate_name = $goodscate[$item->goods_cate_id] ?? '';
-            });
+            ]);
 
         $retval = [
             'list' => $list,
