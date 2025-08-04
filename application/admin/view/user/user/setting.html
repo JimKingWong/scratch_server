@@ -20,7 +20,9 @@
             <!-- 余额修改 -->
             <div class="tab-pane fade active in" id="tab-balance">
                 <div class="alert alert-info-light" style="margin-bottom:10px;">
-                    <b class="text-red">当前余额: {$row.money}</b> 
+                    <b class="text-red">当前余额: {$row.money}</b> <br>
+                    1. 博主工资和退款使用发放奖金提现, 不要输入余额<br>
+                    2. 赠送只能输入余额, 不能输入奖金<br>
                 </div>
                 <div class="widget-body no-padding">
                     <form id="develop-form" class="develop-form form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('user.user/setting?type=balance&ids=' . $row['id'])}">
@@ -32,9 +34,9 @@
                         </div>
                         {if $auth->role < 3}
                         <div class="form-group">
-                            <label for="c-typing_amount_limit" class="control-label col-xs-12 col-sm-2">{:__('打码量')}:</label>
+                            <label for="c-bonus" class="control-label col-xs-12 col-sm-2">{:__('奖金')}:</label>
                             <div class="col-xs-12 col-sm-4">
-                                <input id="c-typing_amount_limit" class="form-control" name="row[typing_amount_limit]" type="number" >
+                                <input id="c-bonus" class="form-control" name="row[bonus]" type="number" >
                             </div>
                         </div>
                         {/if}
