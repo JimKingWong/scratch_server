@@ -52,7 +52,7 @@ class Withdraw extends Base
     public function apply()
     {
         $pay_password = $this->request->post('pay_password', '');
-        $wallet_id = $this->request->post('wallet_id', 0);
+        // $wallet_id = $this->request->post('wallet_id', 0);
         $money = $this->request->post('money', 0);
 
         $user = $this->auth->getUser();
