@@ -2,7 +2,9 @@
 
 namespace app\common\service;
 
+use app\common\model\Record;
 use app\common\model\Cate;
+use app\common\model\GoodsCate;
 use app\common\model\MoneyLog;
 use app\common\model\Order;
 use app\common\model\RewardLog;
@@ -392,6 +394,34 @@ class Game extends Base
         }
 
         return $grid;
+    }
+
+    /**
+     * 游戏记录
+     */
+    public function record()
+    {
+        $limit = $this->request->param('limit/d', 10);
+
+        $goodscate = GoodsCate::column('id,name');
+
+        $fields = "id,roundid,goods_cate_id,win_amount,is_win,status,createtime";
+        $where['user_id'] = $this->auth->id;
+        $list = Record::where($where)
+            ->field($fields)
+            ->order('id desc')
+            ->paginate([
+                'list_rows' => $limit,
+                'query'     => $this->request->param(),
+            ])->each(function($item) use ($goodscate){
+                $item->goods_cate_name = $goodscate[$item->goods_cate_id] ?? '';
+            });
+
+        $retval = [
+            'list' => $list,
+        ];
+
+        $this->success(__('请求成功'), $retval);
     }
 
     /**

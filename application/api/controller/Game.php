@@ -36,5 +36,13 @@ class Game extends Api
         $service->testRtp();
     }
 
+    /**
+     * 游戏记录
+     */
+    public function record()
+    {
+        $service = new \app\common\service\Game();
+        $service->record();
+    }
 
 }
