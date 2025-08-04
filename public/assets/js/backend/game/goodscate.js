@@ -6,7 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'game/goodscate/index' + location.search,
-                    add_url: 'game/goodscate/add',
+                    // add_url: 'game/goodscate/add',
                     edit_url: 'game/goodscate/edit',
                     del_url: 'game/goodscate/del',
                     multi_url: 'game/goodscate/multi',
