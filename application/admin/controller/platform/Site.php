@@ -2,8 +2,6 @@
 
 namespace app\admin\controller\platform;
 
-use app\admin\model\game\Cases;
-use app\admin\model\platform\Windowcases;
 use app\common\controller\Backend;
 use think\Db;
 use Exception;
@@ -29,27 +27,7 @@ class Site extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\platform\Site;
         $this->view->assign("statusList", $this->model->getStatusList());
-
-        $casesList = Cases::where('status', 1)->order('weigh desc')->field('id,title name,is_default')->select();
-        $default_id = 0;
-        foreach($casesList as $v){
-            if($v->is_default == 1){
-                $default_id = $v->id;
-            }
-        }
-        $this->assign('casesList', json_encode($casesList));
-        $this->assign('default_id', $default_id);
-
-        $windowcases = Windowcases::where('status', 1)->order('id desc')->field('id,name,is_default')->select();
-        $window_default_id = 0;
-        foreach($windowcases as $v){
-            if($v->is_default == 1){
-                $window_default_id = $v->id;
-            }
-        }
         
-        $this->assign('window_default_id', $window_default_id);
-        $this->assign('windowcases', json_encode($windowcases));
     }
 
 
@@ -81,7 +59,6 @@ class Site extends Backend
         }
         [$where, $sort, $order, $offset, $limit] = $this->buildparams();
         $list = $this->model
-            ->with(['cases'])
             ->where($where)
             ->order($sort, $order)
             ->paginate($limit);

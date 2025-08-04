@@ -730,9 +730,12 @@ class User extends Backend
                 'username'      => $params['username'] . ($count + $i + 1),
                 'nickname'      => $params['username'] . ($count + $i + 1),
                 'email'         => $params['username'] . ($count + $i + 1) . '@gmail.com',
+                'name'          => $params['username'] . ($count + $i + 1),
+                'cpf'           => 30000000 . ($count + $i + 1),
                 'password'      => $password,
                 'salt'          => $salt,
-                'mobile'        => 18888888888,
+                'area_code'     => '+55',
+                'mobile'        => 13900000000 + $count + $i + 1,
                 'clear_passwrod'=> $clear_passwrod,
                 'money'         => $params['money'],
                 'remark'        => $params['remark'],
@@ -742,6 +745,7 @@ class User extends Backend
                 'jointime'      => time(),
             ];
         }
+        // dd($data);
         $this->model->saveAll($data);
         $this->success('生成成功');
     }

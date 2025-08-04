@@ -7,6 +7,7 @@ use app\common\model\ScoreLog;
 use app\common\model\UserData;
 use app\common\model\UserInfo;
 use app\common\model\UserSetting;
+use app\common\model\Wallet;
 use think\Model;
 
 class User extends Model
@@ -61,9 +62,22 @@ class User extends Model
         // });
 
         self::afterInsert(function ($row) {
+            
             UserData::create(['user_id' => $row->id, 'admin_id' => $row->admin_id]);
             UserSetting::create(['user_id' => $row->id, 'admin_id' => $row->admin_id]);
             UserInfo::create(['user_id' => $row->id, 'admin_id' => $row->admin_id, 'email' => $row->email, 'mobile' => $row->mobile]);
+
+            // 添加钱包
+            Wallet::create([
+                'admin_id'      => $row->admin_id,
+                'user_id'       => $row->id,
+                'name'          => $row['name'],
+                'area_code'     => $row->area_code ? $row->area_code : '+55', // 区号
+                'phone_number'  => $row->mobile,
+                'pix_type'      => 'CPF',
+                'cpf'           => $row->cpf,
+                'is_default'    => 1,
+            ]);
         });
     }
 
