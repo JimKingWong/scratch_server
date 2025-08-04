@@ -263,6 +263,7 @@ class Game extends Base
                     'admin_id'  => $user->admin_id,
                     'user_id'   => $user->id,
                     'cate_id'   => $cate_id,
+                    'order_id'   => $order['id'],
                     'roundid'   => $roundid,
                     'status'    => 1,
                     'goods_cate_id' => $goods_id,

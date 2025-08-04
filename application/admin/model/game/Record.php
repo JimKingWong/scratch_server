@@ -3,38 +3,37 @@
 namespace app\admin\model\game;
 
 use think\Model;
-use traits\model\SoftDelete;
 
-class Platform extends Model
+
+class Record extends Model
 {
 
-    use SoftDelete;
+    
 
     
 
     // 表名
-    protected $name = 'game_platform';
+    protected $name = 'game_record';
     
     // 自动写入时间戳字段
-    protected $autoWriteTimestamp = 'datetime';
-    protected $dateFormat = 'Y-m-d H:i:s';
+    protected $autoWriteTimestamp = 'integer';
 
     // 定义时间戳字段名
     protected $createTime = 'createtime';
     protected $updateTime = 'updatetime';
-    protected $deleteTime = 'deletetime';
+    protected $deleteTime = false;
 
     // 追加属性
     protected $append = [
-        'is_default_text',
+        'is_win_text',
         'status_text'
     ];
     
 
     
-    public function getIsDefaultList()
+    public function getIsWinList()
     {
-        return ['0' => __('Is_default 0'), '1' => __('Is_default 1')];
+        return ['0' => __('Is_win 0'), '1' => __('Is_win 1')];
     }
 
     public function getStatusList()
@@ -43,10 +42,10 @@ class Platform extends Model
     }
 
 
-    public function getIsDefaultTextAttr($value, $data)
+    public function getIsWinTextAttr($value, $data)
     {
-        $value = $value ?: ($data['is_default'] ?? '');
-        $list = $this->getIsDefaultList();
+        $value = $value ?: ($data['is_win'] ?? '');
+        $list = $this->getIsWinList();
         return $list[$value] ?? '';
     }
 
@@ -61,4 +60,8 @@ class Platform extends Model
 
 
 
+    public function user()
+    {
+        return $this->belongsTo('app\admin\model\User', 'id', 'id', [], 'LEFT')->setEagerlyType(0);
+    }
 }

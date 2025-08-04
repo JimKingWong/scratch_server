@@ -3,22 +3,31 @@
 namespace app\admin\controller\game;
 
 use app\common\controller\Backend;
-use app\common\service\util\Es;
 
 /**
- * 
+ * 游戏记录
  *
  * @icon fa fa-circle-o
  */
 class Record extends Backend
 {
-    protected $noNeedRight = ['omgrecord', 'jdbrecord'];
+
+    /**
+     * Record模型对象
+     * @var \app\admin\model\game\Record
+     */
+    protected $model = null;
+    protected $dataLimit = 'department'; // 部门数据权限
+
 
     public function _initialize()
     {
         parent::_initialize();
-       
+        $this->model = new \app\admin\model\game\Record;
+        $this->view->assign("isWinList", $this->model->getIsWinList());
+        $this->view->assign("statusList", $this->model->getStatusList());
     }
+
 
 
     /**
@@ -30,147 +39,36 @@ class Record extends Backend
 
     /**
      * 查看
-     *
-     * @return string|Json
-     * @throws \think\Exception
-     * @throws DbException
      */
     public function index()
     {
-        return $this->view->fetch();
-    }
-
-    /**
-     * omg游戏记录
-     */
-    public function omgrecord()
-    {
+        //当前是否为关联查询
+        $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags', 'trim']);
-       
-        if($this->request->isAjax()){
-            $filter = $this->request->get("filter", '');
-            $filter = json_decode($filter, true);
-
-            // 后台所有部门的id
-            $adminIds = \app\admin\model\department\Admin::getChildrenAdminIds($this->auth->id, true);
-            if($this->auth->role < 2){
-                array_push($adminIds, 0);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
             }
-            
-            $condition = [
-                // 必要条件
-                [
-                    'type' => 'terms',
-                    'field' => 'admin_id',
-                    'value' =>  $adminIds,
-                ],
-            ];
-
-            $fieldArr = ['platform', 'transaction_id', 'game_id', 'user_id'];
-            foreach($fieldArr as $val){
-                if(isset($filter[$val]) && $filter[$val] != ''){
-                    $condition[] = [
-                        'type' => 'term',
-                        'field' => $val,
-                        'value' =>  $filter[$val],
-                    ];
-                }
-            }
-
-            if(isset($filter['createtime']) && $filter['createtime'] != ''){
-                list($starttime, $endtime) = explode(' - ', $filter['createtime']);
-                $condition[] = [
-                    'type' => 'range',
-                    'field' => 'createtime',
-                    'value' => [
-                        'gte' => strtotime($starttime),
-                        'lte' => strtotime($endtime),
-                    ]       
-                ];
-            }
-        
-            // dd($condition);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            $service = new Es();
-            
-            $list = $service->record('omg_game_record', $condition, $offset, $limit);
-            foreach($list['list'] as $key => $val){
-                $list['list'][$key]['createtime'] = datetime($val['createtime']);
+            $list = $this->model
+                    ->with(['user'])
+                    ->where($where)
+                    ->order($sort, $order)
+                    ->paginate($limit);
+
+            foreach ($list as $row) {
+                
+                $row->getRelation('user')->visible(['name']);
             }
-            
-            $result = ['total' => $list['total'], 'rows' => $list['list']];
+
+            $result = array("total" => $list->total(), "rows" => $list->items());
+
             return json($result);
         }
-        return $this->view->fetch('index');
-    }
-
-    /**
-     * 查看
-     *
-     * @return string|Json
-     * @throws \think\Exception
-     * @throws DbException
-     */
-    public function jdbrecord()
-    {
-        //设置过滤方法
-        $this->request->filter(['strip_tags', 'trim']);
-        if (false === $this->request->isAjax()) {
-            return $this->view->fetch();
-        }
-
-        $filter = $this->request->get("filter", '');
-        $filter = json_decode($filter, true);
-
-        // 后台所有部门的id
-        $adminIds = \app\admin\model\department\Admin::getChildrenAdminIds($this->auth->id, true);
-        
-        $condition = [
-            // 必要条件
-            [
-                'type' => 'terms',
-                'field' => 'admin_id',
-                'value' =>  $adminIds,
-            ],
-        ];
-
-        $fieldArr = ['platform', 'transaction_id', 'game_id', 'user_id'];
-        foreach($fieldArr as $val){
-            if(isset($filter[$val]) && $filter[$val] != ''){
-                $condition[] = [
-                    'type' => 'term',
-                    'field' => $val,
-                    'value' =>  $filter[$val],
-                ];
-            }
-        }
-
-        if(isset($filter['createtime']) && $filter['createtime'] != ''){
-            list($starttime, $endtime) = explode(' - ', $filter['createtime']);
-            $condition[] = [
-                'type' => 'range',
-                'field' => 'createtime',
-                'value' => [
-                    'gte' => strtotime($starttime),
-                    'lte' => strtotime($endtime),
-                ]       
-            ];
-        }
-      
-        // dd($condition);
-        list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
-        $service = new Es();
-        
-        $list = $service->record('jdb_game_record', $condition, $offset, $limit);
-        foreach($list['list'] as $key => $val){
-            $list['list'][$key]['createtime'] = datetime($val['createtime']);
-        }
-        
-        $result = ['total' => $list['total'], 'rows' => $list['list']];
-        return json($result);
+        return $this->view->fetch();
     }
 
 }
