@@ -27,7 +27,7 @@ class Index extends Api
     /**
      * 部署第一步
      */
-    public function startup()
+    private function startup()
     {
         // 创建es
         $service = new \app\common\service\util\Startup;
