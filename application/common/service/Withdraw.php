@@ -38,8 +38,8 @@ class Withdraw extends Base
             'is_set'        => $user->pay_password ? 1 : 0, // 密码检查
             'min_withdraw'  => config('system.min_withdraw'), // 最小提现金额
             'withdraw_rate' => config('system.withdraw_rate'), // 提现手续费
-            'money'         => $user->money, // 账户余额
-            'bonus'         => $user->bonus, // 奖金余额 可提金额
+            'money'         => number_format($user->money, 2, '.', ''), // 账户余额
+            'bonus'         => number_format($user->bonus, 2, '.', ''), // 奖金余额 可提金额
             // 'need_bet'      => sprintf('%.2f', $need_bet), // 打码量
             'wallet'        => $wallet, // 钱包列表
         ];
@@ -461,8 +461,8 @@ class Withdraw extends Base
             }
 
         }catch(\Exception $e){
-            // \think\Log::record($e->getMessage(),'u2cppay_withdraw_ERROR');
-            echo $e->getMessage();
+            \think\Log::record($e->getMessage(),'u2cppay_withdraw_ERROR');
+            // echo $e->getMessage();
             Db::rollback();
         }
     }

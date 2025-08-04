@@ -656,8 +656,16 @@ class User extends Base
         if($email && !Validate::is($email, 'email')){
             $this->error(__('邮箱格式不正确'));
         }
-
+        
         $user = $this->auth->getUser();
+
+        if($email != $user->email){
+            $check_email = db('user')->where('email', $email)->find();
+            if($check_email){
+                $this->error(__('邮箱已存在'));
+            }
+        }
+
         $user->name = $name;
         $user->email = $email;
         $user->save();
