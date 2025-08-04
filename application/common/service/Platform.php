@@ -57,7 +57,7 @@ class Platform extends Base
         }else{
             $goods = db('goods_cate')->cache(true, 3600)->column('name,price,image', 'id');
             foreach($record as $val){
-                $awards[$k]['username'] = isset($users[$val['user_id']]) ? dealUsername($users[$val['user_id']]) : dealUsername('unknown');
+                $awards[$k]['username'] = isset($users[$val['user_id']]) ? dealUsername($users[$val['user_id']]) : dealUsername(Sign::generateTraceId(8));
                 $awards[$k]['goods_name'] = $goods[$val['goods_cate_id']]['name'];
                 $awards[$k]['goods_price'] = $goods[$val['goods_cate_id']]['price'];
                 $awards[$k]['goods_image'] = $goods[$val['goods_cate_id']]['image'] ? cdnurl($goods[$val['goods_cate_id']]['image']) : '';
