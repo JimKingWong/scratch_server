@@ -121,7 +121,7 @@ class Withdraw extends Base
             ->whereTime('paytime', '>=', datetime(strtotime('-7 days')))
             ->value('wallet_id');
         // dd($cehckSameWalletId);
-        if($cehckSameWalletId && $cehckSameWalletId != $wallet_id){
+        if($cehckSameWalletId && $cehckSameWalletId != $wallet['id']){
             $this->error(__('一个CPF只能用于一个账户'));
         }
 
@@ -140,7 +140,7 @@ class Withdraw extends Base
         $withdrawData = [
             'admin_id'      => $user->admin_id,
             'user_id'       => $user->id,
-            'wallet_id'     => $wallet_id,
+            'wallet_id'     => $wallet['id'],
             'money'         => $money,
             'order_no'      => date('YmdHis') . rand(100000, 999999), // 生成订单号
             'fee'           => $money * $withdraw_rate / 100,
