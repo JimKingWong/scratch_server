@@ -5,6 +5,7 @@ namespace app\common\service;
 use app\common\model\Cate;
 use app\common\model\MoneyLog;
 use app\common\model\Order;
+use app\common\model\RewardLog;
 use app\common\model\User;
 use fast\Random;
 use think\Cache;
@@ -86,13 +87,6 @@ class Game extends Base
 
             $this->success(__('您本次已购买过该游戏'), $retval);
         }
-
-        // $freeze_money = $user->freeze_money;
-
-        // // 如果冻结金额不足购买, 则需从奖金里扣除 记得充值和后台赠送补下冻结金额
-        // if($freeze_money < $cate->price){
-
-        // }
 
         // 冻结金额 + 奖金 < 购买金额
         if($user->freeze_money + $user->bonus < $cate->price){
@@ -325,6 +319,17 @@ class Game extends Base
                     ]) === false){
                         $result = false;
                     }
+
+                    RewardLog::create([
+                        'admin_id'          => $user->admin_id,
+                        'user_id'           => $user->id,
+                        'type'              => 'lottery',
+                        'money'             => $goods['price'],
+                        'memo'              => '刮刮乐中奖',
+                        'status'            => 1,
+                        'transaction_id'    => $roundid,
+                        'receivetime'       => datetime(time()),
+                    ]);
                 }
                 
                 if($result != false){

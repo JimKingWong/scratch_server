@@ -191,7 +191,7 @@ class Recharge extends Base
             'gift_amount'         => $gift_amount,
             'typing_amount'       => ($money + $gift_amount) * $multiple,
         ];
-        // $this->model->save($orderData);exit;
+        $this->model->save($orderData);exit;
         
 
         // 调用对应支付通道函数
@@ -485,9 +485,10 @@ class Recharge extends Base
 
 
             // 充值佣金
-            // $this->commission($user, $order, $amount);
+            $this->commission($user, $order, $amount);
             
             // 写入日志并更新用户数据
+            $user->freeze_money += $total_amount; // 冻结金额 补个冻结金额
             if(User::insertLog($user, $reward_data) === false){
                 $result = false;
             }
