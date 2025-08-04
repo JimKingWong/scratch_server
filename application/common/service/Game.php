@@ -95,6 +95,11 @@ class Game extends Base
 
         $winItem = db('goods_cate')->where('cate_id', $cate_id)->field('id,name,price,odds,is_win,image')->select();
 
+        if($user->is_test == 1){
+            // 测试号高一点
+            $cate->rtp = 0.95;
+        }
+
         // rtp处理
         $winItem = $this->rtp($cate, $winItem);
         
