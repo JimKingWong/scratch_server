@@ -50,6 +50,7 @@ class Recharge extends Base
             if($val['money'] >= 30){
                 $list[$key]['gift_amount'] = 0.05 * $val['money'];
             }
+            $list[$key]['gift_rate'] = '+5%';
             // foreach($config as $v){
             //     if($val['money'] >= $v['min_money'] && $val['money'] < $v['max_money']){
             //         // $list[$key]['gift_amount'] = $v['gift_amount']; // 暂时不需要
