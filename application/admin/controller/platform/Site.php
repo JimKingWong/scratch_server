@@ -95,7 +95,6 @@ class Site extends Backend
         [$where, $sort, $order, $offset, $limit] = $this->buildparams();
         $invite_code = db('admin_data')->where('admin_id', $this->auth->id)->value('invite_code');
         $list = $this->model
-            ->with(['cases'])
             ->where($where)
             ->order($sort, $order)
             ->paginate($limit);
