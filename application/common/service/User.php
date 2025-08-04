@@ -27,7 +27,8 @@ class User extends Base
     public function userinfo()
     {
         $userinfo = $this->auth->getUserinfo();
-
+        $userinfo['money'] = number_format($userinfo['money'], 2, '.', '');
+        $userinfo['bonus'] = number_format($userinfo['bonus'], 2, '.', '');
         $retval = [
             'userinfo'              => $userinfo,
         ];
