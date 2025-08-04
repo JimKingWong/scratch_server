@@ -160,6 +160,12 @@ class Auth
             $this->setError(__('手机号已存在'));
             return false;
         }
+
+        $checkCpf = User::where('cpf', $extend['cpf'])->where('origin', $extend['origin'])->find();
+        if($checkCpf){
+            $this->setError(__('一个CPF只能用于一个账户'));
+            return false;
+        }
         
         // $ip = request()->ip();
         $ip = $_SERVER["REMOTE_ADDR"];
