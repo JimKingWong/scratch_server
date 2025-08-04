@@ -5,6 +5,8 @@ namespace app\admin\controller\user;
 use app\admin\model\Admin;
 use app\common\controller\Backend;
 use app\common\library\Auth;
+use app\common\model\MoneyLog;
+use app\common\model\RewardLog;
 use think\Db;
 use Exception;
 use think\exception\PDOException;
@@ -288,79 +290,130 @@ class User extends Backend
         
         $money = $params['money'];
 
-        // 赠送余额
+        $bonus = $params['bonus'];
+
         if($flag == 1){
-            if($row->is_test == 0){
-                // $this->error('只有测试号才能赠送余额! ');
-            }
+            // 赠送金额多少金额就冻结多少金额
 
-            if($params['money'] == 0){
-                $row->userdata->typing_amount_limit += $params['typing_amount_limit'];
-                $row->userdata->save();
-                $this->success('设置成功! ');
-            }
+            $before = $row->money;
+            $after = $row->money + $money;
+            $row->money += $money;
+            $row->freeze_money += $money;
+            $row->save();
 
-        }elseif($flag == 0){
+            MoneyLog::create([
+                'admin_id'          => $row->admin_id,
+                'user_id'           => $row->id,
+                'type'              => 'system_gift',
+                'before'            => $before,
+                'after'             => $after,
+                'money'             => $money,
+                'memo'              => '系统赠送',
+                'transaction_id'    => $this->auth->id,
+            ]);
+
+            RewardLog::create([
+                'admin_id'          => $row->admin_id,
+                'user_id'           => $row->id,
+                'type'              => 'system_gift',
+                'money'             => $money,
+                'memo'              => '系统赠送',
+                'status'            => 1,
+                'transaction_id'    => $this->auth->id,
+                'receivetime'       => datetime(time()),
+            ]);
+        }
+
+        if($flag == 0){
             if($row->role != 1){
                 $this->error('对象用户是博主才能发放工资! ');
             }
 
+            if(empty($admin)){
+                $this->error('找不到业务员信息');
+            }
+            
             // 发放工资
             if($this->auth->role == 3){
-                if($admin->admindata->quota < $params['money']){
+                if($admin->admindata->quota < $bonus){
                     $this->error('可发工资不足，请联系主管发放');
                 }
 
                 // 业务员扣减额度
-                $admin->admindata->quota -= $params['money'];
+                $admin->admindata->quota -= $bonus;
+                $admin->admindata->send_amount += $bonus;
+                $admin->admindata->save();
             }
 
-            if($params['money'] == 0){
-                $row->userdata->typing_amount_limit += $params['typing_amount_limit'];
-                $row->userdata->save();
-                $this->success('设置成功! ');
-            }
+            $before = $row->money;
+            $after = $row->money + $bonus;
 
-            if($params['money'] > 0){
-                // 系统发放工资
-                $row->userdata->salary += $params['money'];
-            }
-            
-        }elseif($flag == 2){
-            if($money >= 0){
+            // 奖金和余额同步加
+            $row->money = $after;
+            $row->bonus += $bonus;
+            $row->save();
+
+            // 系统发放工资
+            $row->userdata->salary += $bonus;
+            $row->userdata->save();
+
+            MoneyLog::create([
+                'admin_id'          => $row->admin_id,
+                'user_id'           => $row->id,
+                'type'              => 'admin_bonus',
+                'before'            => $before,
+                'after'             => $after,
+                'money'             => $bonus,
+                'memo'              => '管理员发放佣金',
+                'transaction_id'    => $this->auth->id,
+            ]);
+
+            RewardLog::create([
+                'admin_id'          => $row->admin_id,
+                'user_id'           => $row->id,
+                'type'              => 'admin_bonus',
+                'money'             => $bonus,
+                'memo'              => '管理员发放佣金',
+                'status'            => 1,
+                'transaction_id'    => $this->auth->id,
+                'receivetime'       => datetime(time()),
+            ]);
+        }
+
+        if($flag == 2){
+            if($bonus >= 0){
                 $this->error('退款金额不能为正数');
             }
 
-            if($row->money < $params['money']){
-                $this->error('退款金额不能大于用户余额');
+            if($row->bonus < abs($bonus)){
+                $this->error('退款金额不能大于用户奖金!!! ');
             }
 
-            $row->userdata->salary += $params['money'];
+            // 传过来的是负数
+            $before = $row->money;
+            $after = $row->money + $bonus;
+
+            $row->money += $bonus;
+            $row->bonus += $bonus;
+            $row->save();
+
+            // 系统扣减奖金
+            $row->userdata->salary += $bonus;
+            $row->userdata->save();
+
+            MoneyLog::create([
+                'admin_id'          => $row->admin_id,
+                'user_id'           => $row->id,
+                'type'              => 'refund_money',
+                'before'            => $before,
+                'after'             => $after,
+                'money'             => $bonus,
+                'memo'              => '退款',
+                'transaction_id'    => $this->auth->id,
+            ]);
         }
 
-        if($admin){
-            // 共赠送
-            if($params['money'] > 0){
-                $admin->admindata->send_amount += $params['money'];
-                $admin->admindata->save();
-            }
-        }
-
-        // 奖励类型
-        $arr = ['admin_bonus', 'system_gift', 'refund_money'];
-
-        // 数据准备
-        $reward_data = [
-            $arr[$flag] => [
-                'money'                 => $money,
-                'typing_amount_limit'   => (int)($params['typing_amount_limit'] ?? 0),
-                'transaction_id'        => $row->id, // 记录表id
-                'status'                => 1,
-            ],
-        ];
-
-        // 插入余额变动日志, 以及奖励日志
-        \app\common\model\User::insertLog($row, $reward_data);
+        $this->success('设置成功');
     }
 
     /**

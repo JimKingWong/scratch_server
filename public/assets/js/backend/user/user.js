@@ -80,6 +80,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'userdata.salary', title: __('工资'), sortable: true, operate: 'BETWEEN'},
                         {field: 'money', title: __('Money'), operate: 'NUMBER', sortable: true, operate: 'BETWEEN'},
                         {field: 'bonus', title: __('可取金额'), operate: 'NUMBER', sortable: true, operate: 'BETWEEN'},
+                        {field: 'freeze_money', title: __('冻结金额'), operate: 'NUMBER', sortable: true, operate: 'BETWEEN'},
                         {
                             field: 'userdata.invite_num', 
                             title: __('下级/下级充值'), 
@@ -374,6 +375,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     $('.commission').removeClass('hide');
                 }else{
                     $('.commission').addClass('hide');
+                }
+            })
+
+            $(document).on("click", "input[name='row[flag]']:checked", function(){
+                let flag = $(this).val();
+                if(flag == 1){
+                    $('.bonus').addClass('hide');
+                    $('.money').removeClass('hide');
+                }else{
+                    $('.bonus').removeClass('hide');
+                    $('.money').addClass('hide');
                 }
             })
             Controller.api.bindevent();
