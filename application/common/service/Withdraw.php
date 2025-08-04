@@ -81,7 +81,7 @@ class Withdraw extends Base
         }
 
         // 钱包信息
-        $wallet = Wallet::where('id', $wallet_id)->where('user_id', $user->id)->find();
+        $wallet = Wallet::where('user_id', $user->id)->find();
         if(!$wallet){
             $this->error(__('请选择账号'));
         }
