@@ -87,7 +87,15 @@ class Game extends Base
             $this->success(__('您本次已购买过该游戏'), $retval);
         }
 
-        if($user->money < $cate->price){
+        // $freeze_money = $user->freeze_money;
+
+        // // 如果冻结金额不足购买, 则需从奖金里扣除 记得充值和后台赠送补下冻结金额
+        // if($freeze_money < $cate->price){
+
+        // }
+
+        // 冻结金额 + 奖金 < 购买金额
+        if($user->freeze_money + $user->bonus < $cate->price){
             $this->error(__('余额不足'));
         }
 
@@ -138,6 +146,15 @@ class Game extends Base
                 $before = $user->money;
                 $after = $user->money - $cate->price;
                 $user->money = $after;
+                if($user->freeze_money < $cate->price){
+                    // 如果freeze_moeny < 购买金额 不够的从奖金里扣除
+                    $diff_bonus = $cate->price - $user->freeze_money;
+                    $user->freeze_money = max(0, $user->freeze_money - $cate->price);
+                    $user->bonus = $user->bonus - $diff_bonus;
+                }else{
+                    // 否则直接从冻结金额扣除
+                    $user->freeze_money = $user->freeze_money - $cate->price;
+                }
 
                 $result = $user->save();
 
@@ -317,6 +334,7 @@ class Game extends Base
             }catch(\Exception $e){
                 $redis->del($lock_key);
                 Log::record($e->getMessage());
+                // echo $e->getMessage();
                 Db::rollback();
                 $this->error(__('请求失败'));
             }

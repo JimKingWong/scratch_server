@@ -464,7 +464,7 @@ class Recharge extends Base
             // 充值数据
             $reward_data['recharge'] = [
                 'money'                 => $amount, // 充值金额
-                'typing_amount_limit'   => $typing_amount_limit, // 打码量要求
+                'typing_amount_limit'   => 0, // 打码量要求
                 'transaction_id'        => $order->order_no,
                 'status'                => 1,
             ];
@@ -485,7 +485,7 @@ class Recharge extends Base
 
 
             // 充值佣金
-            $this->commission($user, $order, $amount);
+            // $this->commission($user, $order, $amount);
             
             // 写入日志并更新用户数据
             if(User::insertLog($user, $reward_data) === false){
