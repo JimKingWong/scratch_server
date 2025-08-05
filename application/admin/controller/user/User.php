@@ -159,6 +159,7 @@ class User extends Backend
         Db::startTrans();
         try {
             $row->money += $params['money'];
+            $row->freeze_money += $params['money'];
             $result = $row->save();
             Db::commit();
         } catch (ValidateException|PDOException|Exception $e) {
