@@ -36,6 +36,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'name', title: __('Name'), operate: 'LIKE'},
+                        {field: 'title', title: __('标题'), operate: 'LIKE'},
                         {field: 'image', title: __('Image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
                         {field: 'status', title: __('Status'), searchList: {"0":__('Status 0'),"1":__('Status 1')}, formatter: Table.api.formatter.toggle},
                         {field: 'price', title: __('价格'), operate: false},
