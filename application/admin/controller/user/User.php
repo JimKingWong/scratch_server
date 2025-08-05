@@ -492,8 +492,7 @@ class User extends Backend
             $arr = [
                 '\app\common\model\Recharge', '\app\common\model\Withdraw',
                 '\app\common\model\MoneyLog', '\app\common\model\RewardLog', 
-                '\app\common\model\Wallet', '\app\common\model\VipLog', 
-                '\app\common\model\TurntableLog', '\app\common\model\PrizeLog'
+                '\app\common\model\Wallet', '\app\common\model\GameRecord', 
             ];
 
             foreach($arr as $val){
@@ -524,8 +523,7 @@ class User extends Backend
             $arr = [
                 '\app\common\model\Recharge', '\app\common\model\Withdraw',
                 '\app\common\model\MoneyLog', '\app\common\model\RewardLog', 
-                '\app\common\model\Wallet', '\app\common\model\VipLog', 
-                '\app\common\model\TurntableLog', '\app\common\model\PrizeLog'
+                '\app\common\model\Wallet', '\app\common\model\GameRecord', 
             ];
             
             // $parent = db('user_data')->where('user_id', $row->parent_id)->setInc('invite_num');
