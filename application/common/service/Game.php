@@ -97,7 +97,7 @@ class Game extends Base
 
         $order_no = date('YmdHis') . mt_rand(100000, 999999);
 
-        $winItem = db('goods_cate')->where('cate_id', $cate_id)->field('id,name,price,odds,is_win,image')->select();
+        $winItem = db('goods_cate')->where('cate_id', $cate_id)->where('status', 1)->field('id,name,price,odds,is_win,image')->select();
 
         if($user->is_test == 1){
             // 测试号高一点
@@ -376,12 +376,12 @@ class Game extends Base
 
             $winItem = [$winItem, $winItem, $winItem];
 
-            $noWinItem = db('goods_cate')->where('cate_id', $cate_id)->where('is_win', 1)->where('id', '<>', $goods['id'])->field($fields)->orderRaw("rand()")->limit(6)->select();
+            $noWinItem = db('goods_cate')->where('cate_id', $cate_id)->where('status', 1)->where('is_win', 1)->where('id', '<>', $goods['id'])->field($fields)->orderRaw("rand()")->limit(6)->select();
         }else{
             // 未中奖显示的格子
-            $winItem = db('goods_cate')->where('cate_id', $cate_id)->where('is_win', 1)->field($fields)->orderRaw("rand()")->limit(1)->select();
+            $winItem = db('goods_cate')->where('cate_id', $cate_id)->where('status', 1)->where('is_win', 1)->field($fields)->orderRaw("rand()")->limit(1)->select();
 
-            $noWinItem = db('goods_cate')->where('cate_id', $cate_id)->where('is_win', 1)->field($fields)->orderRaw("rand()")->limit(8)->select();
+            $noWinItem = db('goods_cate')->where('cate_id', $cate_id)->where('status', 1)->where('is_win', 1)->field($fields)->orderRaw("rand()")->limit(8)->select();
         }
         
         $grid = array_merge($winItem, $noWinItem);
@@ -463,7 +463,7 @@ class Game extends Base
             $cate->rtp = $rtp;
         }
 
-        $winItem = db('goods_cate')->where('cate_id', $cate_id)->field('id,name,price,odds,is_win,image')->select();
+        $winItem = db('goods_cate')->where('cate_id', $cate_id)->where('status', 1)->field('id,name,price,odds,is_win,image')->select();
         
         // rtp处理
         $winItem = $this->rtp($cate, $winItem);

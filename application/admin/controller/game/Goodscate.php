@@ -74,7 +74,7 @@ class Goodscate extends Backend
                 $row->getRelation('cate')->visible(['name','image']);
             }
 
-            $odds = db('goods_cate')->where('cate_id', $cate_id)->sum('odds');
+            $odds = db('goods_cate')->where('cate_id', $cate_id)->where('status', 1)->sum('odds');
 
             $result = array("total" => $list->total(), "rows" => $list->items(), 'extend' => ['odds' => $odds]);
 
