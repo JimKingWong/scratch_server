@@ -16,7 +16,8 @@ class Goods extends Model
     protected $name = 'goods';
     
     // 自动写入时间戳字段
-    protected $autoWriteTimestamp = 'integer';
+    protected $autoWriteTimestamp = 'datetime';
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     // 定义时间戳字段名
     protected $createTime = 'createtime';
