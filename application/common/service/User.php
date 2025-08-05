@@ -599,9 +599,9 @@ class User extends Base
         });
 
         $retval = [
-            'money'             => number_format($user->money),
-            'freeze_money'      => number_format($user->freeze_money),
-            'bonus'             => number_format($user->bonus),
+            'money'             => number_format($user->money, '2'),
+            'freeze_money'      => number_format($user->freeze_money, '2'),
+            'bonus'             => number_format($user->bonus, '2'),
             'record'            => $record,
             'recharge'          => $recharge,
             'withdraw'          => $withdraw,
