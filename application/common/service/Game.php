@@ -408,6 +408,15 @@ class Game extends Base
             $where['b.name'] = ['like', "%{$goods_cate_name}%"];
         }
 
+        $starttime = $this->request->param('start_time');
+        $endtime = $this->request->param('end_time');
+        if($starttime != ''){
+            $where['a.createtime'] = ['>=', $starttime];
+            if($endtime != ''){
+                $where['a.createtime'] = [['>=', $starttime], ['<=', $endtime]];
+            }
+        }
+
         $date = $this->request->param('date');
         $dateArr = ['yesterday', 'today', 'week', 'last week', 'month', 'last month'];
         if($date != '' && !in_array($date, $dateArr)){
@@ -423,12 +432,9 @@ class Game extends Base
         $where['a.user_id'] = $this->auth->id;
         $list = Record::alias('a')
             ->join('GoodsCate b', 'a.goods_cate_id = b.id')
-            ->where($where);
-        if($date != ''){
-            $list = $list->whereTime('a.createtime', $date);
-        }
-        $list = $list->field($fields)
+            ->where($where)
             ->order('a.id desc')
+            ->field($fields)
             ->paginate([
                 'list_rows' => $limit,
                 'query'     => $this->request->param(),
