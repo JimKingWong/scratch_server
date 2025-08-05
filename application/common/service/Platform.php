@@ -39,7 +39,7 @@ class Platform extends Base
         $k = 0;
 
         // 中奖记录比较少时, 用假数据
-        $game_goods = db('goods_cate')->where('status', 1)->where('price', '>', 500)->cache(true, 3600)->field('name,price,image')->orderRaw("rand()")->limit(20)->select();
+        $game_goods = db('goods_cate')->where('status', 1)->where('price', '>=', 500)->cache(true, 3600)->field('name,price,image')->orderRaw("rand()")->limit(20)->select();
        
         foreach($game_goods as $val){
             $awards[$k]['username'] = dealUsername(Sign::generateTraceId(8));
