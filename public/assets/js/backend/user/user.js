@@ -243,8 +243,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return str;
                             }
                         },
-                        {field: 'userdata.total_bet', title: __('流水'), sortable: true, operate: 'BETWEEN'},
-                        {field: 'userdata.today_bet', title: __('今日流水'), sortable: true, operate: 'BETWEEN'},
                         {field: 'userdata.typing_amount_limit', title: __('提现所需流水'), sortable: true, operate: 'BETWEEN'},
                         {field: 'userdata.total_withdraw', title: __('累计提现'), sortable: true, operate: 'BETWEEN'},
                         {field: 'userdata.total_recharge', title: __('累计充值'), sortable: true, operate: 'BETWEEN'},
@@ -252,6 +250,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'userdata.today_profit', title: __('今日盈利'), sortable: true, operate: 'BETWEEN'},
                         {field: 'userdata.salary', title: __('工资'), sortable: true, operate: 'BETWEEN'},
                         {field: 'money', title: __('Money'), operate: 'NUMBER', sortable: true, operate: 'BETWEEN'},
+                        {field: 'bonus', title: __('可取金额'), operate: 'NUMBER', sortable: true, operate: 'BETWEEN'},
+                        {field: 'freeze_money', title: __('冻结金额'), operate: 'NUMBER', sortable: true, operate: 'BETWEEN'},
                         {
                             field: 'invite_code', 
                             title: __('自身码||上级码'), 
