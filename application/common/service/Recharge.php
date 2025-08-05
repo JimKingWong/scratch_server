@@ -191,7 +191,7 @@ class Recharge extends Base
             'gift_amount'         => $gift_amount,
             'typing_amount'       => ($money + $gift_amount) * $multiple,
         ];
-        $this->model->save($orderData);exit;
+        // $this->model->save($orderData);exit;
         
 
         // 调用对应支付通道函数
