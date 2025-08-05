@@ -28,7 +28,7 @@ class Platform extends Base
             ->where('pid', 0)
             ->order('weigh desc')
             ->field('id,name,title,intro,price,image')
-            ->cache(true, 86400)
+            // ->cache(true, 86400)
             ->select();
         foreach ($cate as $val) {
             $val->image = $val->image ? cdnurl($val->image) : '';
