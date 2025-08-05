@@ -428,7 +428,9 @@ class Game extends Base
             $where['a.is_win'] = $is_win;
         }
 
-        $fields = "a.id,a.roundid,a.goods_cate_id,a.win_amount,a.is_win,a.status,a.createtime,b.name as goods_cate_name";
+        $cate = Cate::column('id,price');
+
+        $fields = "a.id,a.roundid,a.cate_id,a.goods_cate_id,a.win_amount,a.is_win,a.status,a.createtime,b.name as goods_cate_name";
         $where['a.user_id'] = $this->auth->id;
         $list = Record::alias('a')
             ->join('GoodsCate b', 'a.goods_cate_id = b.id')
@@ -438,7 +440,9 @@ class Game extends Base
             ->paginate([
                 'list_rows' => $limit,
                 'query'     => $this->request->param(),
-            ]);
+            ])->each(function($item) use($cate){
+                $item->cate_price = $cate[$item->cate_id] ?? 0;
+            });
 
         $retval = [
             'list' => $list,
