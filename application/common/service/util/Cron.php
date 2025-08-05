@@ -237,61 +237,26 @@ class Cron
         $channel_fee = $recharge_money * $recharge_channel_rate + $withdraw_money * $withdraw_channel_rate;
         echo '通道费用: ' . $channel_fee. "\n";
 
-        // 游戏输赢记录统计
-        $es = new Es();
-        $condition = [
-            // 时间范围查询
-            [
-                'type' => 'range',
-                'field' => 'createtime',
-                'value' => [
-                    'gte' => strtotime($starttime),
-                    'lte' => strtotime($endtime),
-                ]
-            ]
-        ];
-
-        // 下注流水
-        $bet_amount = 0;
-
-        // omg聚合游戏记录集合
-        $omgGroupSearch = $es->groupAggregation('omg_game_record', $condition, 'platform', ['win_amount', 'bet_amount']);
-        // dd($omgGroupSearch);
-        // 客损
-        $omg_user_lost = 0;
-        foreach($omgGroupSearch as $val){
-            $omg_user_lost += $val['bet_amount_sum'] - $val['win_amount_sum'];
-
-            $bet_amount += $val['bet_amount_sum'];
-        }
-
-        $jdbGroupSearch = $es->groupAggregation('jdb_game_record', $condition, 'platform', ['win_amount', 'bet_amount']);
-        $jdb_user_lost = 0;
-        foreach($jdbGroupSearch as $val){
-            $jdb_user_lost += $val['bet_amount_sum'] - $val['win_amount_sum'];
-
-            $bet_amount += $val['bet_amount_sum'];
-        }
-
         $cate = db('cate')->column('id,price');
         $gameRecord = db('game_record')->where('createtime', 'between', [$starttime, $endtime])
             ->field('id,win_amount,is_win,cate_id')
             ->select();
 
         $bet_amount = 0;
+        $win_amount = 0;
         foreach($gameRecord as $val){
             $bet_amount += $cate[$val['cate_id']];
             if($val['is_win'] == 1){
-                $bet_amount += $cate[$val['cate_id']];
+                $win_amount += $val['win_amount'];
             }
         }
 
-        // 客损
-        $user_lost = $omg_user_lost + $jdb_user_lost;
+        $user_lost = $bet_amount - $win_amount;
+        
         echo '客损: ' . $user_lost. "\n";
 
         // API费用
-        $game_api_fee = abs($user_lost) * config('channel.game_api_fee');
+        $game_api_fee = 0;
         echo 'API费用: ' . $game_api_fee. "\n";
 
         // 今日盈利 = 充值总金额 - 提现金额 - 通道费用 - API费用
@@ -886,50 +851,19 @@ class Cron
 
         // 博主工资
         $salary = db('user_reward_log')->where('createtime', 'between', [$starttime, $endtime])->where('status', 1)->where('type', 'admin_bonus')->group('admin_id')->column('sum(money)', 'admin_id');
-        $es = new Es();
+        // $es = new Es();
 
         // 用作判断是否已插入
         $adminLogs = db('daybookadmin')->where('date', date('Y-m-d', strtotime('-' . $day . ' day')))->column('id', 'admin_id');
 
-        $game_api_fee = config('channel.game_api_fee');
         $recharge_channel_rate = config('channel.recharge_channel_rate');
         $withdraw_channel_rate = config('channel.withdraw_channel_rate');
+
         $data = [];
         foreach($admin_ids as $key => $admin_id){
             if(!isset($adminLogs[$admin_id])){
-                $condition[$key] = [
-                    // 时间范围查询
-                    [
-                        'type' => 'range',
-                        'field' => 'createtime',
-                        'value' => [
-                            'gte' => strtotime($starttime),
-                            'lte' => strtotime($endtime),
-                        ]
-                    ],
-                    [
-                        'type'  => 'term',
-                        'field' => 'admin_id',
-                        'value' => $admin_id
-                    ]
-                ];
                 
-                // omg聚合游戏记录集合
-                $omgGroupSearch = $es->groupAggregation('omg_game_record', $condition[$key], 'platform', ['win_amount', 'bet_amount']);
-
-                $omg_win_amount = array_sum(array_column($omgGroupSearch, 'win_amount_sum'));
-                $omg_bet_amount = array_sum(array_column($omgGroupSearch, 'bet_amount_sum'));
-                $omg_api = bcmul($omg_bet_amount - $omg_win_amount, $game_api_fee, 2);
-
-                // jdb聚合游戏记录集合
-                $jdbGroupSearch = $es->groupAggregation('jdb_game_record', $condition[$key], 'platform', ['win_amount', 'bet_amount']);
-
-                $jdb_win_amount = array_sum(array_column($jdbGroupSearch, 'win_amount_sum'));
-                $jdb_bet_amount = array_sum(array_column($jdbGroupSearch, 'bet_amount_sum'));
-                $jdb_api = bcmul($jdb_bet_amount - $jdb_win_amount, $game_api_fee, 2);
-                
-                $api_fee = bcadd($omg_api, $jdb_api, 2);
-                $api_fee = abs($api_fee);
+                $api_fee = 0;
 
                 $recharge_amount = $recharge[$admin_id] ?? 0;
                 $withdraw_amount = $withdraw[$admin_id] ?? 0;

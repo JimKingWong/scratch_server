@@ -35,36 +35,19 @@ class Platform extends Base
             $val->price = number_format($val->price, 2);
         }
 
-        // 中奖记录
-        $users = db('user')->where('is_test', 0)->cache(true, 3600)->column('username', 'id');
-        $record = db('game_record')->where('is_win', 1)->cache(true, 3600)->orderRaw("rand()")->limit(20)->select();
         $awards = [];
         $k = 0;
-        if(count($record) < 20){
-            // 中奖记录比较少时, 用假数据
-            $game_goods = db('goods_cate')->where('status', 1)->cache(true, 3600)->field('name,price,image')->orderRaw("rand()")->limit(20)->select();
-            $userinfo = 0;
-            if(!empty($users)){
-                $userinfo = array_rand($users);
-            }
-            foreach($game_goods as $val){
-                $awards[$k]['username'] = isset($users[$userinfo]) ? dealUsername($users[$userinfo]) : dealUsername(Sign::generateTraceId(8));
-                $awards[$k]['goods_name'] = $val['name'];
-                $awards[$k]['goods_price'] = $val['price'];
-                $awards[$k]['goods_image'] = $val['image'] ? cdnurl($val['image']) : '';
-                $k ++;
-            }
-        }else{
-            $goods = db('goods_cate')->cache(true, 3600)->column('name,price,image', 'id');
-            foreach($record as $val){
-                $awards[$k]['username'] = isset($users[$val['user_id']]) ? dealUsername($users[$val['user_id']]) : dealUsername(Sign::generateTraceId(8));
-                $awards[$k]['goods_name'] = $goods[$val['goods_cate_id']]['name'];
-                $awards[$k]['goods_price'] = $goods[$val['goods_cate_id']]['price'];
-                $awards[$k]['goods_image'] = $goods[$val['goods_cate_id']]['image'] ? cdnurl($goods[$val['goods_cate_id']]['image']) : '';
-                $k ++;
-            }
+
+        // 中奖记录比较少时, 用假数据
+        $game_goods = db('goods_cate')->where('status', 1)->where('price', '>', 500)->cache(true, 3600)->field('name,price,image')->orderRaw("rand()")->limit(20)->select();
+       
+        foreach($game_goods as $val){
+            $awards[$k]['username'] = dealUsername(Sign::generateTraceId(8));
+            $awards[$k]['goods_name'] = $val['name'];
+            $awards[$k]['goods_price'] = $val['price'];
+            $awards[$k]['goods_image'] = $val['image'] ? cdnurl($val['image']) : '';
+            $k ++;
         }
-        
 
         $retval = [
             'cate'      => $cate,
