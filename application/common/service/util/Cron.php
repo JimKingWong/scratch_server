@@ -273,6 +273,19 @@ class Cron
             $bet_amount += $val['bet_amount_sum'];
         }
 
+        $cate = db('cate')->column('id,price');
+        $gameRecord = db('game_record')->where('createtime', 'between', [$starttime, $endtime])
+            ->field('id,win_amount,is_win,cate_id')
+            ->select();
+
+        $bet_amount = 0;
+        foreach($gameRecord as $val){
+            $bet_amount += $cate[$val['cate_id']];
+            if($val['is_win'] == 1){
+                $bet_amount += $cate[$val['cate_id']];
+            }
+        }
+
         // 客损
         $user_lost = $omg_user_lost + $jdb_user_lost;
         echo '客损: ' . $user_lost. "\n";
