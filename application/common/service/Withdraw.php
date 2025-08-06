@@ -441,20 +441,40 @@ class Withdraw extends Base
             $order->remark = $order->channel->name . ': ' . $remark;
             $order->status = 3; // 改成失败单
             $result = $order->save();
-            
+
             // 返回金额到用户钱包
-            // 数据准备
-            $data = [
-                'withdraw_return' => [
-                    'money'                 => $order->money,
-                    'typing_amount_limit'   => 0,
-                    'transaction_id'        => $order->order_no, // 记录表id
-                    'status'                => 0,
-                ],
-            ];
-            if(User::insertLog($user, $data) === false){
+            $before = $user->money;
+            $after = $user->money + $order->money;
+            $user->money = $after;
+            $user->bonus = $user->bonus + $order->money;
+            $result = $user->save();
+
+            if(MoneyLog::create([
+                'admin_id'          => $user->admin_id,
+                'user_id'           => $user->id,
+                'type'              => 'withdraw_return',
+                'before'            => $before,
+                'after'             => $after,
+                'money'             => $order->money,
+                'memo'              => '提现拒绝',
+                'transaction_id'    => $order['order_no'],
+            ]) === false){
                 $result = false;
             }
+            
+            // // 返回金额到用户钱包
+            // // 数据准备
+            // $data = [
+            //     'withdraw_return' => [
+            //         'money'                 => $order->money,
+            //         'typing_amount_limit'   => 0,
+            //         'transaction_id'        => $order->order_no, // 记录表id
+            //         'status'                => 0,
+            //     ],
+            // ];
+            // if(User::insertLog($user, $data) === false){
+            //     $result = false;
+            // }
 
             if($result != false){
                 Db::commit();
