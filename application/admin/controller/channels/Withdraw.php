@@ -71,12 +71,11 @@ class Withdraw extends Backend
                     ->paginate($limit);
 
             
-            $gameRecords = db('game_record')->alias('a')->join('cate b', 'a.cate_id=b.id')->field('a.id,a.user_id,a.win_amount,b.price')->select();
+            // $gameRecords = db('game_record')->alias('a')->join('cate b', 'a.cate_id=b.id')->field('a.id,a.user_id,a.win_amount,b.price')->select();
+            $gameRecords = db('game_record a')->join('cate b', 'a.cate_id=b.id')->group('a.user_id')->field('a.user_id,sum(a.win_amount) win_amount,sum(b.price) bet_amount')->select();
             $records = [];
             foreach($gameRecords as $v){
-                // $gameRecords[$k]['win_amount'] = sprintf('%.2f', $v['win_amount']);
-                // $gameRecords[$k]['bet_amount'] = sprintf('%.2f', $v['price']);
-                $records[$v['user_id']] = $v['price'] - $v['win_amount'];
+                $records[$v['user_id']] = $v['win_amount'] - $v['bet_amount'];
             }
             foreach ($list as $row) {
                 $row->getRelation('admin')->visible(['nickname']);
