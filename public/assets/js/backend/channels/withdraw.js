@@ -68,7 +68,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                 <div><span>名字: </span>${row.wallet.name}</div>
                                                 <div><span>手机号: </span>${row.wallet.area_code} ${row.wallet.phone_number}</div>
                                                 <div><span>类型: </span>${row.wallet.chave_pix}</div>
-                                                <a href="javascript:" data-url="user/wallet/index?ids=${row.user_id}" class="dialogit" title="用户钱包信息" data-area=\'["80%", "100%"]\'><div><span>CPF/CNPJ: </span>${row.wallet.pix}</div></a>
+                                                <a href="javascript:" data-url="user/wallet/index?ids=${row.user_id}" class="dialogit" title="用户钱包信息" data-area=\'["80%", "60%"]\'><div><span>CPF/CNPJ: </span>${row.wallet.pix}</div></a>
                                             </div>
                                         </div>`;
                             },

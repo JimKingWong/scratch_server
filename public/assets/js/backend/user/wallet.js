@@ -6,6 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'user/wallet/index' + location.search,
+                    edit_url: 'user/wallet/edit',
                     multi_url: 'user/wallet/multi',
                     table: 'user_wallet',
                 }
@@ -20,7 +21,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortName: 'id',
                 fixedColumns: true,
                 fixedRightNumber: 1,
-                searchFormVisible: true,
+                // searchFormVisible: true,
                 columns: [
                     [
                         {checkbox: true},
@@ -49,17 +50,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'chave_pix', title: __('Chave_pix'), operate: 'LIKE'},
                         {field: 'cpf', title: __('Cpf'), operate: 'LIKE'},
                         {field: 'pix', title: __('Pix'), operate: 'LIKE', table: table, class: 'autocontent', formatter: Table.api.formatter.content},
-                        {field: 'is_default', title: __('Is_default'), searchList: {"0":__('Is_default 0'),"1":__('Is_default 1')}, formatter: Table.api.formatter.normal},
-                        {field: 'status', title: __('状态'), searchList: {"0":__('拉黑'),"1":__('正常')}, formatter: Table.api.formatter.toggle},
+                        // {field: 'is_default', title: __('Is_default'), searchList: {"0":__('Is_default 0'),"1":__('Is_default 1')}, formatter: Table.api.formatter.normal},
+                        // {field: 'status', title: __('状态'), searchList: {"0":__('拉黑'),"1":__('正常')}, formatter: Table.api.formatter.toggle},
                         {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', autocomplete:false},
                         {field: 'updatetime', title: __('Updatetime'), operate:'RANGE', addclass:'datetimerange', autocomplete:false},
-                        // {
-                        //     field: 'operate', 
-                        //     title: __('Operate'), 
-                        //     table: table, 
-                        //     events: Table.api.events.operate, 
-                        //     formatter: Table.api.formatter.operate
-                        // }
+                        {
+                            field: 'operate', 
+                            title: __('Operate'), 
+                            table: table, 
+                            events: Table.api.events.operate, 
+                            formatter: Table.api.formatter.operate
+                        }
                     ]
                 ],
                 queryParams: function (params) {
@@ -68,8 +69,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var op = JSON.parse(params.op);
                     //这里可以动态赋值，比如从URL中获取admin_id的值，filter.admin_id=Fast.api.query('admin_id');
                     if(Config.user_id){
-                            filter.user_id = Config.user_id;
-                            op.user_id = "=";
+                        filter.user_id = Config.user_id;
+                        op.user_id = "=";
                     }
                     params.filter = JSON.stringify(filter);
                     params.op = JSON.stringify(op);

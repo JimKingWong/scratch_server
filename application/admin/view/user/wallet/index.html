@@ -1,6 +1,6 @@
-<div class="alert alert-info-light" style="margin-bottom:10px;width: 40%;">
+<!-- <div class="alert alert-info-light" style="margin-bottom:10px;width: 40%;">
     <b class="text-red">温馨提示: 点击状态开关, 即可拉黑改账号</b><br>
-</div>
+</div> -->
 <div class="panel panel-default panel-intro">
     {:build_heading()}
 
@@ -11,7 +11,7 @@
                     <div id="toolbar" class="toolbar">
                         <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}" ><i class="fa fa-refresh"></i> </a>
                         <!-- <a href="javascript:;" class="btn btn-success btn-add {:$auth->check('user/wallet/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a> -->
-                        <!-- <a href="javascript:;" class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('user/wallet/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a> -->
+                        <a href="javascript:;" class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('user/wallet/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a>
                         <!-- <a href="javascript:;" class="btn btn-danger btn-del btn-disabled disabled {:$auth->check('user/wallet/del')?'':'hide'}" title="{:__('Delete')}" ><i class="fa fa-trash"></i> {:__('Delete')}</a> -->
                  
                     </div>
