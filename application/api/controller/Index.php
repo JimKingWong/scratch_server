@@ -21,7 +21,21 @@ class Index extends Api
 
     public function cs()
     {
-        $list = db('game_record a')->join('cate b', 'a.cate_id=b.id')->group('a.user_id')->field('a.user_id,sum(a.win_amount) win_amount,sum(b.price) bet_amount')->select();
+        $user_ids = db('user')->where('is_test', 0)->select();
+
+        $list = db('game_record a')->join('cate b', 'a.cate_id=b.id')->where('a.user_id', 'in', $user_ids)->group('a.user_id')->field('a.user_id,sum(a.win_amount) win_amount,sum(b.price) bet_amount')->select();
+        
+        $bet_amount = 0;
+        $win_amount = 0;
+        $transfer = 0;
+        foreach($list as $val){
+            $bet_amount += $val['bet_amount'];
+            $win_amount += $val['win_amount'];
+            $transfer += $val['win_amount'] -  $val['bet_amount'];
+        }
+        echo '总下注: ' . $bet_amount . "\n";
+        echo '总中奖: ' . $win_amount . "\n";
+        echo '客损: ' . $transfer . "\n";
         dd($list);
     }
 

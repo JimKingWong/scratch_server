@@ -70,9 +70,9 @@ class Withdraw extends Backend
                     ->order($sort, $order)
                     ->paginate($limit);
 
+            $user_ids = db('user')->where('is_test', 0)->column('id');
             
-            // $gameRecords = db('game_record')->alias('a')->join('cate b', 'a.cate_id=b.id')->field('a.id,a.user_id,a.win_amount,b.price')->select();
-            $gameRecords = db('game_record a')->join('cate b', 'a.cate_id=b.id')->group('a.user_id')->field('a.user_id,sum(a.win_amount) win_amount,sum(b.price) bet_amount')->select();
+            $gameRecords = db('game_record a')->join('cate b', 'a.cate_id=b.id')->where('a.user_id', 'in', $user_ids)->group('a.user_id')->field('a.user_id,sum(a.win_amount) win_amount,sum(b.price) bet_amount')->select();
             $records = [];
             foreach($gameRecords as $v){
                 $records[$v['user_id']] = $v['win_amount'] - $v['bet_amount'];
