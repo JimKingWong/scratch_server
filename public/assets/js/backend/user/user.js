@@ -72,11 +72,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return str;
                             }
                         },
+                        {field: 'email', title: __('邮箱')},
                         {field: 'pay_password', title: __('支付密码')},
                         {field: 'userdata.total_withdraw', title: __('累计提现'), sortable: true, operate: 'BETWEEN'},
                         {field: 'userdata.total_recharge', title: __('累计充值'), sortable: true, operate: 'BETWEEN'},
-                        {field: 'userdata.total_profit', title: __('累计盈利'), sortable: true, operate: 'BETWEEN'},
-                        {field: 'userdata.today_profit', title: __('今日盈利'), sortable: true, operate: 'BETWEEN'},
+                        {field: 'userdata.total_profit', title: __('累计中奖'), sortable: true, operate: 'BETWEEN'},
+                        {field: 'userdata.today_profit', title: __('今日中奖'), sortable: true, operate: 'BETWEEN'},
                         {field: 'userdata.salary', title: __('工资'), sortable: true, operate: 'BETWEEN'},
                         {field: 'money', title: __('Money'), operate: 'NUMBER', sortable: true, operate: 'BETWEEN'},
                         {field: 'bonus', title: __('可取金额'), operate: 'NUMBER', sortable: true, operate: 'BETWEEN'},
