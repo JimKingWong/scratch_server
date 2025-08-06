@@ -660,50 +660,53 @@ class Withdraw extends Backend
             $retval[$i - 1]['total_withdraw_money'] = $withdrawMoneyArr[$i] ?? 0;
         }
 
-        $es = new Es();
+        // $es = new Es();
 
-        $condition = [
-            // 用户id搜索
-            [
-                'type' => 'term',
-                'field' => 'user_id',
-                'value' =>  $user_id,
-            ],
-        ];
+        // $condition = [
+        //     // 用户id搜索
+        //     [
+        //         'type' => 'term',
+        //         'field' => 'user_id',
+        //         'value' =>  $user_id,
+        //     ],
+        // ];
 
-        $platformList = Omg::getPlatform();
-        $omgGroupSearch = $es->groupAggregation('omg_game_record', $condition, 'platform', ['win_amount', 'bet_amount', 'transfer_amount']);
-        $gameData = [];
-        foreach($platformList as $key => $val){
-            if(isset($omgGroupSearch[$key])){
-                $gameData[$key]['win_amount'] = $omgGroupSearch[$key]['win_amount_sum'] ?? 0;
-                $gameData[$key]['bet_amount'] = $omgGroupSearch[$key]['bet_amount_sum'] ?? 0;
-                $gameData[$key]['transfer_amount'] = $omgGroupSearch[$key]['transfer_amount_sum'] ?? 0;
-                $gameData[$key]['platform'] = $platformList[$key];
-            }else{
-                $gameData[$key]['win_amount'] = 0;
-                $gameData[$key]['bet_amount'] = 0;
-                $gameData[$key]['transfer_amount'] = 0;
-                $gameData[$key]['platform'] = $platformList[$key];
-            }
-        }   
+        // $platformList = Omg::getPlatform();
+        // $omgGroupSearch = $es->groupAggregation('omg_game_record', $condition, 'platform', ['win_amount', 'bet_amount', 'transfer_amount']);
+        // $gameData = [];
+        // foreach($platformList as $key => $val){
+        //     if(isset($omgGroupSearch[$key])){
+        //         $gameData[$key]['win_amount'] = $omgGroupSearch[$key]['win_amount_sum'] ?? 0;
+        //         $gameData[$key]['bet_amount'] = $omgGroupSearch[$key]['bet_amount_sum'] ?? 0;
+        //         $gameData[$key]['transfer_amount'] = $omgGroupSearch[$key]['transfer_amount_sum'] ?? 0;
+        //         $gameData[$key]['platform'] = $platformList[$key];
+        //     }else{
+        //         $gameData[$key]['win_amount'] = 0;
+        //         $gameData[$key]['bet_amount'] = 0;
+        //         $gameData[$key]['transfer_amount'] = 0;
+        //         $gameData[$key]['platform'] = $platformList[$key];
+        //     }
+        // }   
 
-        $jdbPlatformList = Jdb::getPlatform();
-        $jdbGroupSearch = $es->groupAggregation('jdb_game_record', $condition, 'platform', ['win_amount', 'bet_amount', 'transfer_amount']);
-        $jdbGameData = [];
-        foreach($jdbPlatformList as $key => $val){
-            if(isset($jdbGroupSearch[$key])){
-                $jdbGameData[$key]['win_amount'] = $jdbGroupSearch[$key]['win_amount_sum'] ?? 0;
-                $jdbGameData[$key]['bet_amount'] = $jdbGroupSearch[$key]['bet_amount_sum'] ?? 0;
-                $jdbGameData[$key]['transfer_amount'] = $jdbGroupSearch[$key]['transfer_amount_sum'] ?? 0;
-                $jdbGameData[$key]['platform'] = $jdbPlatformList[$key];
-            }else{
-                $jdbGameData[$key]['win_amount'] = 0;
-                $jdbGameData[$key]['bet_amount'] = 0;
-                $jdbGameData[$key]['transfer_amount'] = 0;
-                $jdbGameData[$key]['platform'] = $jdbPlatformList[$key];
-            }
-        }
+        // $jdbPlatformList = Jdb::getPlatform();
+        // $jdbGroupSearch = $es->groupAggregation('jdb_game_record', $condition, 'platform', ['win_amount', 'bet_amount', 'transfer_amount']);
+        // $jdbGameData = [];
+        // foreach($jdbPlatformList as $key => $val){
+        //     if(isset($jdbGroupSearch[$key])){
+        //         $jdbGameData[$key]['win_amount'] = $jdbGroupSearch[$key]['win_amount_sum'] ?? 0;
+        //         $jdbGameData[$key]['bet_amount'] = $jdbGroupSearch[$key]['bet_amount_sum'] ?? 0;
+        //         $jdbGameData[$key]['transfer_amount'] = $jdbGroupSearch[$key]['transfer_amount_sum'] ?? 0;
+        //         $jdbGameData[$key]['platform'] = $jdbPlatformList[$key];
+        //     }else{
+        //         $jdbGameData[$key]['win_amount'] = 0;
+        //         $jdbGameData[$key]['bet_amount'] = 0;
+        //         $jdbGameData[$key]['transfer_amount'] = 0;
+        //         $jdbGameData[$key]['platform'] = $jdbPlatformList[$key];
+        //     }
+        // }
+
+        // $gameData = array_merge($gameData, $jdbGameData);
+
 
         $cur_withdraw = db('withdraw')->where('user_id', $user_id)->where('id', $withdraw_id)->value('money');
 
@@ -713,7 +716,22 @@ class Withdraw extends Backend
             'total_withdraw'              => db('withdraw')->where('user_id', $user_id)->where('status', 1)->sum('money'),
         ];
 
-        $gameData = array_merge($gameData, $jdbGameData);
+        $cate = db('cate')->column('id,name');
+
+        $game_record = db('game_record a')
+            ->join('cate b', 'a.cate_id=b.id')
+            ->where('a.user_id', $user_id)
+            ->group('a.user_id,a.cate_id')
+            ->field('a.user_id,a.cate_id,sum(a.win_amount) win_amount,sum(b.price) bet_amount')
+            ->select();
+        $gameData = [];
+        foreach($game_record as $key => $val){
+            $gameData[$val['cate_id']]['win_amount'] = $val['win_amount'] ?? 0;
+            $gameData[$val['cate_id']]['bet_amount'] = $val['bet_amount'] ?? 0;
+            $gameData[$val['cate_id']]['transfer_amount'] = $game_record[$key]['win_amount'] - $game_record[$key]['bet_amount'];
+            $gameData[$val['cate_id']]['platform'] = $cate[$val['cate_id']] ?? '';
+        }
+
         $extend = [
             'valid_users'   => $valid_users,
             'game_data'     => array_values($gameData),
