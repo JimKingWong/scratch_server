@@ -65,7 +65,7 @@ class Withdraw extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $list = $this->model
-                    ->with(['admin','admindata','user','wallet', 'userdata'])
+                    ->with(['admin','user','wallet', 'userdata'])
                     ->where($where)
                     ->order($sort, $order)
                     ->paginate($limit);
@@ -79,14 +79,13 @@ class Withdraw extends Backend
             }
             foreach ($list as $row) {
                 $row->getRelation('admin')->visible(['nickname']);
-                $row->getRelation('admindata')->visible(['invite_code']);
 				$row->getRelation('user')->visible(['username', 'money', 'origin', 'role', 'remark']);
 				$row->getRelation('wallet')->visible(['name', 'area_code','phone_number','pix_type','chave_pix','cpf','pix','is_default']);
                 $row->profit = $records[$row['user_id']] ?? 0;
             }
 
             $withdraw = $this->model
-                ->with(['admin','admindata','user','wallet', 'userdata'])
+                ->with(['admin','user','wallet', 'userdata'])
                 ->where($where)
                 ->select();
 
