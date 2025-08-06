@@ -70,11 +70,20 @@ class Withdraw extends Backend
                     ->order($sort, $order)
                     ->paginate($limit);
 
+            
+            $gameRecords = db('game_record')->alias('a')->join('cate b', 'a.cate_id=b.id')->field('a.id,a.user_id,a.win_amount,b.price')->select();
+            $records = [];
+            foreach($gameRecords as $v){
+                // $gameRecords[$k]['win_amount'] = sprintf('%.2f', $v['win_amount']);
+                // $gameRecords[$k]['bet_amount'] = sprintf('%.2f', $v['price']);
+                $records[$v['user_id']] = $v['price'] - $v['win_amount'];
+            }
             foreach ($list as $row) {
                 $row->getRelation('admin')->visible(['nickname']);
                 $row->getRelation('admindata')->visible(['invite_code']);
 				$row->getRelation('user')->visible(['username', 'money', 'origin', 'role', 'remark']);
 				$row->getRelation('wallet')->visible(['name', 'area_code','phone_number','pix_type','chave_pix','cpf','pix','is_default']);
+                $row->profit = $records[$row['user_id']] ?? 0;
             }
 
             $withdraw = $this->model
