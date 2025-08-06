@@ -23,10 +23,11 @@ class Index extends Api
     {
         $user_ids = db('user')->where('is_test', 0)->column('id');
 
+        $where['a.createtime'] = ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]];
+        $where['a.user_id'] = ['in', $user_ids];
         $list = db('game_record a')
             ->join('cate b', 'a.cate_id=b.id')
-            ->where('a.user_id', 'in', $user_ids)
-            ->whereTime('a.createtime', 'today')
+            ->where($where)
             ->group('a.user_id')
             ->field('a.user_id,sum(a.win_amount) win_amount,sum(b.price) bet_amount')
             ->select();
