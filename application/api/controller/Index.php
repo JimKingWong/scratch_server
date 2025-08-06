@@ -19,6 +19,12 @@ class Index extends Api
     protected $noNeedLogin = ['*'];
     protected $noNeedRight = ['*'];
 
+    public function cs()
+    {
+        $list = db('game_record a')->join('cate b', 'a.cate_id=b.id')->group('a.user_id')->field('a.user_id,sum(a.win_amount) win_amount,sum(b.price) bet_amount')->select();
+        dd($list);
+    }
+
     /**
      * 首页
      *

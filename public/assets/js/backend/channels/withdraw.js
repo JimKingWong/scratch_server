@@ -54,7 +54,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                 <div><span>充值: </span>${row.userdata.total_recharge}</div>
                                                 <div><span>提现: </span>${row.userdata.total_withdraw}</div>
                                                 <div><span>总盈利: </span>${row.profit}</div>
-                                                <div><span>总流水: </span>${row.userdata.total_bet}</div>
                                             </div>
                                         </div>`;
                             },
