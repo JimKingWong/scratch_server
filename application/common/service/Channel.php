@@ -230,7 +230,7 @@ class Channel
         $msg = '';
         if($res['success']){
             $code = 1;
-            $msg = $res['errorCode'];
+            $msg = $res['message'];
         }
 
         $retval = [
