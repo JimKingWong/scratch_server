@@ -101,7 +101,14 @@ class Game extends Base
 
         if($user->is_test == 1){
             // 测试号高一点
-            $cate->rtp = 0.95;
+            $winItem = db('goods_cate')->where('cate_id', $cate_id)->field('id,name,price,odds,is_win,image,status')->select();
+            foreach($winItem as $key => $val){
+                if($val['odds'] <= 0.0001 && $val['is_win'] == 1){
+                    $winItem[$key]['odds'] = 0.9;
+                }
+            }
+            // dd($winItem);
+            $cate->rtp = 10000; // 测试号rtp高一点
         }
 
         // rtp处理
@@ -261,7 +268,6 @@ class Game extends Base
         $is_win = $order['is_win'];
 
         $goods = db('goods_cate')->where('id', $goods_id)->field('id,name,price,image')->find();
-        $goods['price'] = number_format($goods['price'], 2);
         $goods['image'] = $goods['image'] ? cdnurl($goods['image']) : '';
 
         $bet_amount = $order['price'];
