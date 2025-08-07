@@ -154,6 +154,12 @@ class Game extends Base
 
                 $result = $user->save();
 
+                $user->userdata->total_bet = $user->userdata->total_bet + $cate->price;
+                $user->userdata->today_bet = $user->userdata->today_bet + $cate->price;
+                if($user->userdata->save() === false){
+                    $result = false;
+                }
+
                 if(MoneyLog::create([
                     'admin_id'          => $user->admin_id,
                     'user_id'           => $user->id,
@@ -257,6 +263,10 @@ class Game extends Base
         $goods = db('goods_cate')->where('id', $goods_id)->field('id,name,price,image')->find();
         $goods['price'] = number_format($goods['price'], 2);
         $goods['image'] = $goods['image'] ? cdnurl($goods['image']) : '';
+
+        $bet_amount = $order['price'];
+        // 收益
+        $profit = $goods['price'] - $bet_amount;
         
         $roundid = $user->id . '_' . $cate_id . '_' . date('YmdHis');
 
@@ -282,6 +292,7 @@ class Game extends Base
                     'goods_cate_id' => $goods_id,
                     'is_win'        => $is_win,
                     'prizes'    => json_encode($goods),
+                    'bet_amount' => $bet_amount,
                     'win_amount'=> $goods['price'],
                     'createtime'=> datetime(time()),
                     'updatetime'=> datetime(time()),
@@ -303,8 +314,8 @@ class Game extends Base
                         $result = false;
                     }
 
-                    $user->userdata->total_profit = $user->userdata->total_profit + $goods['price'];
-                    $user->userdata->today_profit = $user->userdata->today_profit + $goods['price'];
+                    $user->userdata->total_profit = $user->userdata->total_profit + $profit;
+                    $user->userdata->today_profit = $user->userdata->today_profit + $profit;
                     if($user->userdata->save() === false){
                         $result = false;
                     }
