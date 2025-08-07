@@ -336,7 +336,7 @@ class Cron
         // 博主充值金额
         $blogger_recharge_money = 0;
         
-        $recharges = Recharge::whereTime('createtime', 'today')
+        $recharges = Recharge::whereTime('paytime', 'today')
             ->where('status', '1')
             ->field("user_id,count(id) count,sum(money) money")
             ->group('user_id')
@@ -364,7 +364,7 @@ class Cron
         $withdraw_money = 0;
         // 博主提现金额
         $blogger_withdraw_money = 0;
-        $withdraws = Withdraw::whereTime('createtime', 'today')
+        $withdraws = Withdraw::whereTime('paytime', 'today')
             ->where('status', '1')
             ->where('is_virtual', 0)
             ->field("user_id,sum(money) money")
@@ -394,184 +394,55 @@ class Cron
         $channel_fee = $recharge_money * $recharge_channel_rate + $withdraw_money * $withdraw_channel_rate;
         echo '通道费用: ' . $channel_fee. "\n";
 
-        $es = new Es();
+
+        $cate = db('cate')->column('id,name');
+
+        $game_record = db('game_record')->whereTime('createtime', 'today')
+            ->field('id,is_win,cate_id,win_amount,bet_amount')
+            ->select();
         
-        $tomorrow = date('Y-m-d', strtotime('+1 day'));
-
-        // 查询条件
-        $condition = [
-            // 时间范围查询
-            [
-                'type' => 'range',
-                'field' => 'createtime',
-                'value' => [
-                    'gte' => strtotime($today),
-                    'lte' => strtotime($tomorrow),
-                ]
-            ]
-        ];
-
-        // 下注流水
+        $records = [];
+        $user_lost = 0;
         $bet_amount = 0;
-
-        // 总派彩金额
         $win_amount = 0;
+        foreach($game_record as $val){
+            $records[$val['cate_id']]['name'] = $cate[$val['cate_id']];
+            if(!isset($records[$val['cate_id']]['bet_amount'])){
+                $records[$val['cate_id']]['bet_amount'] = 0;
+            }else{
+                $records[$val['cate_id']]['bet_amount'] += $val['bet_amount'];
+            }
+            
+            if(!isset($records[$val['cate_id']]['win_amount'])){
+                $records[$val['cate_id']]['win_amount'] = 0;
+            }else{
+                $records[$val['cate_id']]['win_amount'] += $val['win_amount'];
+            } 
 
-        // omg聚合游戏记录集合
-        $omgGroupSearch = $es->groupAggregation('omg_game_record', $condition, 'platform', ['win_amount', 'bet_amount']);
-        // dd($omgGroupSearch);
+            $records[$val['cate_id']]['user_lost'] = $records[$val['cate_id']]['bet_amount'] - $records[$val['cate_id']]['win_amount'];
+            $records[$val['cate_id']]['rtp'] = $records[$val['cate_id']]['bet_amount'] == 0 ? 0 : round($records[$val['cate_id']]['win_amount'] / $records[$val['cate_id']]['bet_amount'] * 100, 2);
 
-        // omg总下注流水
-        $omg_bet_amount = 0;
-        // omg总派彩金额
-        $omg_win_amount = 0;
-        // 客损
-        $omg_user_lost = 0;
-        foreach($omgGroupSearch as $val){
-            $omg_user_lost += $val['bet_amount_sum'] - $val['win_amount_sum'];
-
-            $bet_amount += $val['bet_amount_sum'];
-            $win_amount += $val['win_amount_sum'];
-        }
-        if($bet_amount == 0){
-            $omg_rtp = 0;
-        } else {
-            $omg_rtp = round($win_amount / $bet_amount * 100, 2);
-        }
-
-        // pg游戏数据
-        $pg_bet_amount = isset($omgGroupSearch[2]) ? $omgGroupSearch[2]['bet_amount_sum'] : 0;
-        $pg_win_amount = isset($omgGroupSearch[2]) ? $omgGroupSearch[2]['win_amount_sum'] : 0;
-        $pg_user_lost = $pg_bet_amount - $pg_win_amount;
-        if($pg_bet_amount == 0) {  
-            $pg_rtp = 0;  
-        } else {  
-            $pg_rtp = round($pg_win_amount / $pg_bet_amount * 100, 2);
+            $bet_amount += $val['bet_amount'];
+            $win_amount += $val['win_amount'];
+            $user_lost += $val['bet_amount'] - $val['win_amount'];
         }
 
-        // jili游戏数据
-        $jili_bet_amount = isset($omgGroupSearch[3]) ? $omgGroupSearch[3]['bet_amount_sum'] : 0;
-        $jili_win_amount = isset($omgGroupSearch[3]) ? $omgGroupSearch[3]['win_amount_sum'] : 0;
-        $jili_user_lost = $jili_bet_amount - $jili_win_amount;
-        if($jili_bet_amount == 0) {  
-            $jili_rtp = 0;  
-        } else {
-            $jili_rtp = round($jili_win_amount / $jili_bet_amount * 100, 2);
+        foreach($records as $record){
+            echo $record['name'] . '下注 ' . $record['bet_amount'] . ' 派彩 ' . $record['win_amount'] . ' 客损 ' . $record['user_lost'] . ' RTP: ' . $record['rtp'] . "%\n";
         }
 
-        // pp游戏数据
-        $pp_bet_amount = isset($omgGroupSearch[4]) ? $omgGroupSearch[4]['bet_amount_sum'] : 0;
-        $pp_win_amount = isset($omgGroupSearch[4]) ? $omgGroupSearch[4]['win_amount_sum'] : 0;
-        $pp_user_lost = $pp_bet_amount - $pp_win_amount;
-        if($pp_bet_amount == 0) {  
-            $pp_rtp = 0;
-        } else {  
-            $pp_rtp = round($pp_win_amount / $pp_bet_amount * 100, 2);
-        }
-
-        $tada_bet_amount = isset($omgGroupSearch[23]) ? $omgGroupSearch[23]['bet_amount_sum'] : 0;
-        $tada_win_amount = isset($omgGroupSearch[23]) ? $omgGroupSearch[23]['win_amount_sum'] : 0;
-        $tada_user_lost = $tada_bet_amount - $tada_win_amount;
-        if($tada_bet_amount == 0) {  
-            $tada_rtp = 0;
-        } else {  
-            $tada_rtp = round($tada_win_amount / $tada_bet_amount * 100, 2);
-        }
-
-        // cp游戏数据
-        $cp_bet_amount = isset($omgGroupSearch[24]) ? $omgGroupSearch[24]['bet_amount_sum'] : 0;
-        $cp_win_amount = isset($omgGroupSearch[24]) ? $omgGroupSearch[24]['win_amount_sum'] : 0;
-        $cp_user_lost = $cp_bet_amount - $cp_win_amount;
-        if($cp_bet_amount == 0) {
-            $cp_rtp = 0;
-        } else {
-            $cp_rtp = round($cp_win_amount / $cp_bet_amount * 100, 2);
-        }
-
-        // jdb旗下的供应商数据
-        $jdbsGroupSearch = $es->groupAggregation('jdb_game_record', $condition, 'platform', ['win_amount', 'bet_amount']);
-        $jdbs_user_lost = 0;
-        foreach($jdbsGroupSearch as $val){
-            $jdbs_user_lost += $val['bet_amount_sum'] - $val['win_amount_sum'];
-
-            $bet_amount += $val['bet_amount_sum'];
-            $win_amount += $val['win_amount_sum'];
-        }
-
-        $jdb_bet_amount = isset($jdbsGroupSearch[1]) ? $jdbsGroupSearch[1]['bet_amount_sum'] : 0;
-        $jdb_win_amount = isset($jdbsGroupSearch[1]) ? $jdbsGroupSearch[1]['win_amount_sum'] : 0;
-        $jdb_user_lost = $jdb_bet_amount - $jdb_win_amount;
-        if($jdb_bet_amount == 0) {  
-            $jdb_rtp = 0;  
-        } else {  
-            $jdb_rtp = round($jdb_win_amount / $jdb_bet_amount * 100, 2);
-        }
-
-        $spribe_bet_amount = isset($jdbsGroupSearch[2]) ? $jdbsGroupSearch[2]['bet_amount_sum'] : 0;
-        $spribe_win_amount = isset($jdbsGroupSearch[2]) ? $jdbsGroupSearch[2]['win_amount_sum'] : 0;
-        $spribe_user_lost = $spribe_bet_amount - $spribe_win_amount;
-        if($spribe_bet_amount == 0) {  
-            $spribe_rtp = 0;  
-        } else {  
-            $spribe_rtp = round($spribe_win_amount / $spribe_bet_amount * 100, 2);
-        }
-
-        $amb_bet_amount = isset($jdbsGroupSearch[11]) ? $jdbsGroupSearch[11]['bet_amount_sum'] : 0;
-        $amb_win_amount = isset($jdbsGroupSearch[11]) ? $jdbsGroupSearch[11]['win_amount_sum'] : 0;
-        $amb_user_lost = $amb_bet_amount - $amb_win_amount;
-        if($amb_bet_amount == 0) {  
-            $amb_rtp = 0;  
-        } else {  
-            $amb_rtp = round($amb_win_amount / $amb_bet_amount * 100, 2);
-        }
-
-        $smartsoft_bet_amount = isset($jdbsGroupSearch[13]) ? $jdbsGroupSearch[13]['bet_amount_sum'] : 0;
-        $smartsoft_win_amount = isset($jdbsGroupSearch[13]) ? $jdbsGroupSearch[13]['win_amount_sum'] : 0;
-        $smartsoft_user_lost = $smartsoft_bet_amount - $smartsoft_win_amount;
-        if($smartsoft_bet_amount == 0) {  
-            $smartsoft_rtp = 0;  
-        } else {  
-            $smartsoft_rtp = round($smartsoft_win_amount / $smartsoft_bet_amount * 100, 2);
-        }
-
-        echo 'OMG下注 ' . $omg_bet_amount . ' 派彩 ' . $omg_win_amount . ' 客损 ' . $omg_user_lost . "\n";
-        echo 'PG下注 ' . $pg_bet_amount . ' 派彩 ' . $pg_win_amount . ' 客损 ' . $pg_user_lost . "\n";
-        echo 'PP下注 ' . $pp_bet_amount . ' 派彩 ' . $pp_win_amount . ' 客损 ' . $pp_user_lost . "\n";
-        echo 'JILI下注 ' . $jili_bet_amount . ' 派彩 ' . $jili_win_amount . ' 客损 ' . $jili_user_lost . "\n";
-        echo 'TADA下注 ' . $tada_bet_amount . ' 派彩 ' . $tada_win_amount . ' 客损 ' . $tada_user_lost . "\n";
-        echo 'CP下注 ' . $cp_bet_amount . ' 派彩 ' . $cp_win_amount . ' 客损 ' . $cp_user_lost . "\n";
-        echo 'JDB下注 ' . $jdb_bet_amount . ' 派彩 ' . $jdb_win_amount . ' 客损 ' . $jdb_user_lost . "\n";
-        echo 'SPRIBE下注 ' . $spribe_bet_amount . ' 派彩 ' . $spribe_win_amount . ' 客损 ' . $spribe_user_lost . "\n";
-        echo 'AMB下注 ' . $amb_bet_amount . ' 派彩 ' . $amb_win_amount . ' 客损 ' . $amb_user_lost . "\n";
-        echo 'SMARTSOFT下注 ' . $smartsoft_bet_amount . ' 派彩 ' . $smartsoft_win_amount . ' 客损 ' . $smartsoft_user_lost . "\n";
-
-
-        // 客损 = omg客损 + jdb旗下的供应商客损 后面补PG官方的
-        $user_lost = $omg_user_lost + $jdbs_user_lost;
         echo '客损: ' . $user_lost. "\n";
 
         // API费用
-        $game_api_fee = $user_lost * config('channel.game_api_fee');
-        $game_api_fee = abs($game_api_fee);
-        echo 'API费用: ' . $game_api_fee. "\n";
+        // $game_api_fee = $user_lost * config('channel.game_api_fee');
+        $game_api_fee = 0;
+        // echo 'API费用: ' . $game_api_fee. "\n";
 
         // 今日盈利 = 充值总金额 - 提现金额 - 通道费用 - API费用
         $profit = $recharge_money - $withdraw_money - $channel_fee - $game_api_fee;
         echo '今日盈利: ' . $profit. "\n";
 
-        // 宝箱
-        $boxs = db('box_record')->whereTime('createtime', 'today')->select();
-        // 博主
-        $bz_box_money = 0;
-        // 客户
-        $kh_box_money = 0;
-        foreach($boxs as $box){
-            if(in_array($box['user_id'], $blogger_user_ids)){
-                $bz_box_money += $box['money'];
-            }else{
-                $kh_box_money += $box['money'];
-            }
-        }
+   
         
         // 今日活动奖励
         $acvivityArr = ['pg_bet_bonus', 'loss_bonus', 'first_recharge_bonus', 'admin_bonus'];
@@ -599,44 +470,27 @@ class Cron
         $today = date("Y-m-d H:i:s") . "\n";
 
         $str = "==={$today}=== \n";
-        $str .= "===HMS共推台-数据报表=== \n";
-        $str .= "OMG游戏: 下注 $bet_amount 派彩  $win_amount 客损 $omg_user_lost RTP: $omg_rtp%\n";
-        $str .= "PG游戏: 下注 $pg_bet_amount  派彩 $pg_win_amount 客损 $pg_user_lost RTP: $pg_rtp%\n";
-        $str .= "TADA游戏: 下注 $tada_bet_amount 派彩  $tada_win_amount 客损 $tada_user_lost RTP: $tada_rtp%\n";
-        $str .= "JILI游戏: 下注 $jili_bet_amount 派彩  $jili_win_amount 客损 $jili_user_lost RTP: $jili_rtp%\n";
-        $str .= "PP游戏: 下注 $pp_bet_amount 派彩  $pp_win_amount 客损 $pp_user_lost RTP: $pp_rtp%\n";
-        $str .= "CP游戏: 下注 $cp_bet_amount 派彩  $cp_win_amount 客损 $cp_user_lost RTP: $cp_rtp%\n";
-        $str .= "JDB游戏: 下注 $jdb_bet_amount 派彩  $jdb_win_amount 客损 $jdb_user_lost RTP: $jdb_rtp%\n";
-        $str .= "SPRIBE游戏: 下注 $spribe_bet_amount 派彩  $spribe_win_amount 客损 $spribe_user_lost RTP: $spribe_rtp%\n";
-        $str .= "AMB游戏: 下注 $amb_bet_amount 派彩  $amb_win_amount 客损 $amb_user_lost RTP: $amb_rtp%\n";
-        $str .= "SMARTSOFT游戏: 下注 $smartsoft_bet_amount 派彩  $smartsoft_win_amount 客损 $smartsoft_user_lost RTP: $smartsoft_rtp%\n";
+        $str .= "===彩票长台-数据报表=== \n";
+        foreach($records as $record){
+            $str .= $record['name'] . "下注 " . $record['bet_amount'] . " 派彩 " . $record['win_amount'] . " 客损 " . $record['user_lost'] . " RTP: " . $record['rtp'] . "%\n";
+        }
         $str .= "注册人数: $user_count \n";
         $str .= "注册且充值人数: $register_recharge_users \n";
         $str .= "复充人数: $repeat_recharge_users \n";
         $str .= "复充金额: $repeat_recharge_money \n";
         $str .= "充值人数: $recharge_count \n";
         $str .= "充值金额: $recharge_money \n";
-        $str .= "有效下注: $bet_amount \n";
         $str .= "总流水: $bet_amount \n";
         $str .= "总派彩: $win_amount \n";
         $str .= "总客损: $user_lost \n";
         $str .= "提现金额: $withdraw_money \n";
         $str .= "博主工资金额(后台): $wd_bz_wage \n";
-        $str .= "博主领取宝箱(邀请): $bz_box_money \n";
         $str .= "博主佣金发放(流水): $bz_commission \n";
         $str .= "博主充值金额: $blogger_recharge_money \n";
         $str .= "博主提现金额: $blogger_withdraw_money \n";
-        $str .= "玩家领取宝箱: $kh_box_money \n";
         $str .= "玩家提现金额: $member_withdraw_money ($rate_user) \n";
         
-        $str .= "-----活动----- \n";
-        $str .= "PG流水奖励: $pgReward \n";
-        $str .= "玩家亏损返水: $lossRebate \n";
-        $str .= "玩家首充奖励: $firstRecharge \n";
-        $str .= "-----活动----- \n";
-        
         $str .= "通道费用: $channel_fee \n";
-        $str .= "API费用: $game_api_fee \n";
         $str .= "今日盈利: $profit \n";
         // echo $str; return;
 
