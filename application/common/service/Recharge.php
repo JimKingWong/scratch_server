@@ -132,7 +132,7 @@ class Recharge extends Base
 
         $where['user_id'] = $user->id;
         $where['order_no'] = $order_no;
-        $row = $this->model->where($where)->field('id,user_id,order_no,money,paytime,createtime')->find();
+        $row = $this->model->where($where)->field('id,user_id,order_no,money,status,paytime,createtime')->find();
         
         $retval = [
             'row'   => $row,
