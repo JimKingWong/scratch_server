@@ -61,7 +61,7 @@ class Record extends Backend
 
             foreach ($list as $row) {
                 
-                $row->getRelation('user')->visible(['name']);
+                // $row->getRelation('user')->visible(['name']);
             }
 
             $result = array("total" => $list->total(), "rows" => $list->items());

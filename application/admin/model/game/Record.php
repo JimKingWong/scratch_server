@@ -62,6 +62,6 @@ class Record extends Model
 
     public function user()
     {
-        return $this->belongsTo('app\admin\model\User', 'id', 'id', [], 'LEFT')->setEagerlyType(0);
+        return $this->belongsTo('app\admin\model\User', 'user_id', 'id', [], 'LEFT')->setEagerlyType(0);
     }
 }
