@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {field: 'user_id', title: __('User_id')},
                         {field: 'user.is_test', title: __('测试号'), searchList: {"0":__('否'),"1":__('是')}, formatter: Table.api.formatter.normal},
-                        {field: 'user.name', title: __('User.name'), operate: 'LIKE', table: table, class: 'autocontent', formatter: Table.api.formatter.content},
+                        {field: 'user.name', title: __('User.name'), operate: 'LIKE'},
                         {field: 'cate_id', title: __('Cate_id')},
                         {field: 'roundid', title: __('Roundid'), operate: 'LIKE'},
                         {field: 'bet_amount', title: __('下注金额'), operate:'BETWEEN'},
