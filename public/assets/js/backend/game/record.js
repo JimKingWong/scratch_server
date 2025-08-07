@@ -31,7 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'cate_id', title: __('Cate_id')},
                         {field: 'roundid', title: __('Roundid'), operate: 'LIKE'},
                         {field: 'bet_amount', title: __('下注金额'), operate:'BETWEEN'},
-                        {field: 'win_amount', title: __('Win_amount'), operate:'BETWEEN'},
+                        {field: 'win_amount', title: __('Win_amount'), operate:'BETWEEN', sortable: true},
                         {field: 'is_win', title: __('Is_win'), searchList: {"0":__('Is_win 0'),"1":__('Is_win 1')}, formatter: Table.api.formatter.normal},
                         // {field: 'status', title: __('Status'), searchList: {"0":__('Status 0'),"1":__('Status 1')}, formatter: Table.api.formatter.status},
                         {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', autocomplete:false},
