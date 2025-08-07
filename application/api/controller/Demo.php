@@ -3,7 +3,7 @@
 namespace app\api\controller;
 
 use app\common\controller\Api;
-
+use think\Db;
 /**
  * 示例接口
  * @ApiInternal
@@ -51,18 +51,40 @@ class Demo extends Api
      */
     public function test1()
     {
-        $url = 'https://hms-fortunapg.bet/?invite_code=b1b3a0%F0%9F%8D%80#/index';
-        $res = $this->extractIdFromUrl($url);
-        var_dump($res);
-        
-        $url = 'https://hms-fortunapg.bet/?invite_code=c5699175&amp;fbclid=PAZXh0bgNhZW0CMTEAAadMWVJB7FeZ8OIQ-x3uLa7g2mEPw8_ufIyb0ubzpa2J2LRy-TofUG7GJEjtHw_aem_iuF9ZvY8JcXfhd0EU-bsjQ#/index';
-        $res = $this->extractIdFromUrl($url);
-        var_dump($res);
-        
-        $url = 'https://hms-fortunapg.bet/?invite_code=d199d47a&amp;fbclid=PAZXh0bgNhZW0CMTEAAacpWxjyJdX-GDeGmelnJ8Itse79C-I9zdsRY7cZ-yLGcgDyEw_Xf13lTg5yhw_aem_i25krpA3haTdX0YT-nQMKQ#/index';
-        $res = $this->extractIdFromUrl($url);
-        var_dump($res);
-        // $this->success('返回成功', ['action' => 'test1']);
+          $userIds = Db::name('user')
+            ->where('parent_id_str', 'like', '%10056,%')
+            ->column('id');
+        // dd($userIds);
+        if (!empty($userIds)) {
+            // 开启事务
+            Db::startTrans();
+            try {
+                // 2. 更新 tp_user 表
+                Db::name('user')
+                    ->where('parent_id_str', 'like', '%10056,%')
+                    ->update(['admin_id' => '58']);
+                
+                // 3. 更新 tp_recharge 表
+                Db::name('recharge')
+                    ->where('user_id', 'in', $userIds)
+                    ->update(['admin_id' => '58']);
+                
+                // 4. 更新 tp_withdraw 表 (注意表名可能是 tp_withdraw 而不是 tp_withdrow)
+                Db::name('withdraw')
+                    ->where('user_id', 'in', $userIds)
+                    ->update(['admin_id' => '58']);
+                
+                // 提交事务
+                Db::commit();
+                echo '更新成功，共更新了 ' . count($userIds) . ' 个用户及其关联记录';
+            } catch (\Exception $e) {
+                // 回滚事务
+                Db::rollback();
+                echo '更新失败: ' . $e->getMessage();
+            }
+        } else {
+            echo '没有找到 pid=10056 的用户';
+        }
     }
     
     public function extractIdFromUrl($url) 

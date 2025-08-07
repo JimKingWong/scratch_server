@@ -527,12 +527,12 @@ class User extends Backend
             ];
             
             // $parent = db('user_data')->where('user_id', $row->parent_id)->setInc('invite_num');
-            Db::name('user_data')
-            ->where('user_id', $row->parent_id)
-            ->update([
-                'invite_num' => Db::raw('invite_num + 1'),
-                'invite_recharge_num' => Db::raw('invite_recharge_num + 1')
-            ]);
+            // Db::name('user_data')
+            // ->where('user_id', $row->parent_id)
+            // ->update([
+            //     'invite_num' => Db::raw('invite_num + 1'),
+            //     'invite_recharge_num' => Db::raw('invite_recharge_num + 1')
+            // ]);
 
             foreach($arr as $val){
                 $userModel = (new $val);
