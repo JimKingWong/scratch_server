@@ -122,6 +122,25 @@ class Recharge extends Base
     }
 
     /**
+     * 查询订单
+     */
+    public function search()
+    {
+        $order_no = $this->request->get('order_no');
+
+        $user = $this->auth->getUser();
+
+        $where['user_id'] = $user->id;
+        $where['order_no'] = $order_no;
+        $row = $this->model->where($where)->field('id,user_id,order_no,money,paytime,createtime')->find();
+        
+        $retval = [
+            'row'   => $row,
+        ];
+        $this->success(__('请求成功'), $retval);
+    }
+
+    /**
      * 创建充值订单
      */
     public function create()

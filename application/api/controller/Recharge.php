@@ -48,4 +48,14 @@ class Recharge extends Api
         $service = new \app\common\service\Recharge;
         $service->record();
     }
+
+    /**
+     * 搜索充值记录
+     */
+    public function search()
+    {
+        $service = new \app\common\service\Recharge;
+        $service->search();
+    }
+    
 }
