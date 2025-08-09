@@ -541,7 +541,7 @@ class Recharge extends Base
         // 所有上级博主
         $where['id'] = ['in', $parent_id_str]; 
         $where['role'] = 1; // 博主 
-        $supUsers = User::where($where)->field('id,admin_id,parent_id_str,money,bonus')->select();
+        $supUsers = User::where($where)->field('id,admin_id,parent_id_str,money,bonus,role')->select();
         
         if($supUsers->isEmpty()){
             return;
@@ -558,10 +558,13 @@ class Recharge extends Base
                 // 确定当前用户属于上级的第几级
                 $level = count($parent_id_arr) - $flip_parent_id_arr[$val->id] - 1;
                 
-                if($val->usersetting->commission_status && $val->usersetting->commission_rate != ''){
-                    
-                    // 取得对应博主能抽到的佣金比例
-                    $commission_rate = explode(',', $val->usersetting->commission_rate)[$level];
+                if($val->role == 1){
+                    $commission_rate_arr = [20, 5];
+                    if($val->usersetting->commission_status && $val->usersetting->commission_rate != ''){
+                        $commission_rate_arr = explode(',', $val->usersetting->commission_rate);
+                    }
+
+                    $commission_rate = $commission_rate_arr[$level];
 
                     // 取得对应博主能抽到的佣金比例
                     $money = $amount * $commission_rate / 100; // 奖励佣金
