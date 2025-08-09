@@ -502,14 +502,14 @@ class Recharge extends Base
             $user->userdata->total_recharge += $amount; 
             $user->userdata->first_recharge_money = $amount; // 首次存款金额
 
-            // 充值佣金
-            $this->commission($user, $order, $amount);
-            
             // 写入日志并更新用户数据
             $user->freeze_money += $total_amount; // 冻结金额 补个冻结金额
             if(User::insertLog($user, $reward_data) === false){
                 $result = false;
             }
+
+            // 充值佣金
+            $this->commission($user, $order, $amount);
             
             if($result){
                 Db::commit();
@@ -538,12 +538,6 @@ class Recharge extends Base
 
         $parent_id_arr = explode(',', $parent_id_str);
 
-        // if(count(explode(',', $parent_id_str)) > 2){
-        //     // 只处理前两级
-        //     unset($parent_id_arr[0]);
-        //     $parent_id_str = implode(',', $parent_id_arr);
-        // }
-
         // 所有上级博主
         $where['id'] = ['in', $parent_id_str]; 
         $where['role'] = 1; // 博主 
@@ -557,94 +551,51 @@ class Recharge extends Base
         // 反转, 看当前用户在第几级
         $flip_parent_id_arr = array_flip($parent_id_arr);
         // dd($flip_parent_id_arr);
-
-        Db::startTrans();
-        try{
-
-            // $commission_rate = [20, 5]; // 默认
-            foreach($supUsers as $val){
+        
+        foreach($supUsers as $val){
+            
+            if(isset($flip_parent_id_arr[$val->id])){
+                // 确定当前用户属于上级的第几级
+                $level = count($parent_id_arr) - $flip_parent_id_arr[$val->id] - 1;
                 
-                if(isset($flip_parent_id_arr[$val->id])){
-                    // 确定当前用户属于上级的第几级
-                    $level = count($parent_id_arr) - $flip_parent_id_arr[$val->id] - 1;
-                    if($val->usersetting->commission_status && $val->usersetting->commission_rate != ''){
-                        // 取得对应博主能抽到的佣金比例
-                        $commission_rate = explode(',', $val->usersetting->commission_rate)[$level];
-
-                        // 取得对应博主能抽到的佣金比例
-                        $money = $amount * $commission_rate / 100; // 奖励佣金
-                        
-                        $before = $val->money; // 之前的金额
-                        $after = $val->money + $money; // 之后的金额
-                        $val->money = $after; // 更新金额
-                        $val->bonus = $val->bonus + $money; // 更新奖金
-                        $val->save();
-
-                        \app\common\model\MoneyLog::create([
-                            'admin_id'          => $val->admin_id,
-                            'user_id'           => $val->id,
-                            'type'              => 'recharge_commission',
-                            'before'            => $before,
-                            'after'             => $after,
-                            'money'             => $money,
-                            'memo'              => '充值佣金',
-                            'transaction_id'    => $order->order_no,
-                        ]);
-
-                        \app\common\model\RewardLog::create([
-                            'admin_id'          => $val->admin_id,
-                            'user_id'           => $val->id,
-                            'type'              => 'recharge_commission',
-                            'money'             => $money,
-                            'memo'              => '充值佣金',
-                            'status'            => 1,
-                            'transaction_id'    => $order->order_no,
-                            'receivetime'       => datetime(time()),
-                        ]);
-                        Db::commit();
-                    }
-
-                   
-
-                    // // 取得对应博主能抽到的佣金比例
-                    // $money = $amount * $commission_rate / 100; // 奖励佣金
+                if($val->usersetting->commission_status && $val->usersetting->commission_rate != ''){
                     
-                    // $before = $val->money; // 之前的金额
-                    // $after = $val->money + $money; // 之后的金额
-                    // $val->money = $after; // 更新金额
-                    // $val->bonus = $val->bonus + $money; // 更新奖金
-                    // $val->save();
+                    // 取得对应博主能抽到的佣金比例
+                    $commission_rate = explode(',', $val->usersetting->commission_rate)[$level];
 
-                    // \app\common\model\MoneyLog::create([
-                    //     'admin_id'          => $val->admin_id,
-                    //     'user_id'           => $val->id,
-                    //     'type'              => 'recharge_commission',
-                    //     'before'            => $before,
-                    //     'after'             => $after,
-                    //     'money'             => $money,
-                    //     'memo'              => '充值佣金',
-                    //     'transaction_id'    => $order->order_no,
-                    // ]);
+                    // 取得对应博主能抽到的佣金比例
+                    $money = $amount * $commission_rate / 100; // 奖励佣金
+                    
+                    $before = $val->money; // 之前的金额
+                    $after = $val->money + $money; // 之后的金额
+                    $val->money = $after; // 更新金额
+                    $val->bonus = $val->bonus + $money; // 更新奖金
+                    $val->save();
 
-                    // \app\common\model\RewardLog::create([
-                    //     'admin_id'          => $val->admin_id,
-                    //     'user_id'           => $val->id,
-                    //     'type'              => 'recharge_commission',
-                    //     'money'             => $money,
-                    //     'memo'              => '充值佣金',
-                    //     'status'            => 1,
-                    //     'transaction_id'    => $order->order_no,
-                    //     'receivetime'       => datetime(time()),
-                    // ]);
-                    // Db::commit();
+                    \app\common\model\MoneyLog::create([
+                        'admin_id'          => $val->admin_id,
+                        'user_id'           => $val->id,
+                        'type'              => 'recharge_commission',
+                        'before'            => $before,
+                        'after'             => $after,
+                        'money'             => $money,
+                        'memo'              => '充值佣金',
+                        'transaction_id'    => $order->order_no,
+                    ]);
+
+                    \app\common\model\RewardLog::create([
+                        'admin_id'          => $val->admin_id,
+                        'user_id'           => $val->id,
+                        'type'              => 'recharge_commission',
+                        'money'             => $money,
+                        'memo'              => '充值佣金',
+                        'status'            => 1,
+                        'transaction_id'    => $order->order_no,
+                        'receivetime'       => datetime(time()),
+                    ]);
                 }
             }
-        }catch(Exception $e){
-            // echo $e->getMessage();
-            \think\Log::record($e->getMessage(),'recharge_commission_ERROR');
-            Db::rollback();
         }
-        
         
     }
 }
