@@ -537,35 +537,38 @@ class Recharge extends Base
         }
 
         $parent_id_arr = explode(',', $parent_id_str);
+        if(count($parent_id_arr) == 3){
+            unset($parent_id_arr[0]);
+            $parent_id_arr = array_values($parent_id_arr);
+        }
 
         // 所有上级博主
         $where['id'] = ['in', $parent_id_str]; 
-        $where['role'] = 1; // 博主 
+        // $where['role'] = 1; // 博主 
         $supUsers = User::where($where)->field('id,admin_id,parent_id_str,money,bonus,role')->select();
         
         if($supUsers->isEmpty()){
             return;
         }
-        // dd($supUsers->toarray());
-        $parent_id_arr = explode(',', $parent_id_str);
+        
+        // $parent_id_arr = explode(',', $parent_id_str);
         // 反转, 看当前用户在第几级
         $flip_parent_id_arr = array_flip($parent_id_arr);
-        // dd($flip_parent_id_arr);
-        
+        // dd($parent_id_arr);
         foreach($supUsers as $val){
             
-            if(isset($flip_parent_id_arr[$val->id])){
+            // 第一级的才有
+            if(isset($flip_parent_id_arr[$val->id]) && $val->id == $parent_id_arr[0]){
                 // 确定当前用户属于上级的第几级
                 $level = count($parent_id_arr) - $flip_parent_id_arr[$val->id] - 1;
                 
-                if($val->role == 1){
-                    $commission_rate_arr = [20, 5];
-                    if($val->usersetting->commission_status && $val->usersetting->commission_rate != ''){
-                        $commission_rate_arr = explode(',', $val->usersetting->commission_rate);
-                    }
-
-                    $commission_rate = $commission_rate_arr[$level];
-
+                $commission_rate_arr = [20, 5];
+                if($val->usersetting->commission_status && $val->usersetting->commission_rate != ''){
+                    $commission_rate_arr = explode(',', $val->usersetting->commission_rate);
+                }
+                
+                $commission_rate = $commission_rate_arr[$level] ?? 0;
+                if($commission_rate > 0){
                     // 取得对应博主能抽到的佣金比例
                     $money = $amount * $commission_rate / 100; // 奖励佣金
                     
