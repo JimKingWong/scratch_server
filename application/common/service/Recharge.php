@@ -558,7 +558,7 @@ class Recharge extends Base
         foreach($supUsers as $val){
             
             // 第一级的才有
-            if(isset($flip_parent_id_arr[$val->id]) && $val->id == $parent_id_arr[0]){
+            if(isset($flip_parent_id_arr[$val->id])){
                 // 确定当前用户属于上级的第几级
                 $level = count($parent_id_arr) - $flip_parent_id_arr[$val->id] - 1;
                 
@@ -568,6 +568,7 @@ class Recharge extends Base
                 }
                 
                 $commission_rate = $commission_rate_arr[$level] ?? 0;
+                // dd($commission_rate);
                 if($commission_rate > 0){
                     // 取得对应博主能抽到的佣金比例
                     $money = $amount * $commission_rate / 100; // 奖励佣金
