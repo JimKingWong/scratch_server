@@ -452,8 +452,8 @@ class User extends Backend
                 $commission_rate[$i] = 0;
             }
 
-            if($commission_rate[$i] > 50 || $commission_rate[$i] < 0){
-                $this->error($i+1 . '级分佣比例在0-50之间');
+            if($commission_rate[$i] > 70 || $commission_rate[$i] < 0){
+                $this->error($i+1 . '级分佣比例在0-70之间');
             }
         }
         $commission_rate = implode(',', $commission_rate);

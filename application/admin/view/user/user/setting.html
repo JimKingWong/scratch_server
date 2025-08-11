@@ -171,7 +171,7 @@
                 <div class="widget-body no-padding">
                     <form id="develop-form" class="develop-form form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('user.user/setting?type=commission&ids=' . $row['id'])}">
                         <div class="alert alert-info-light" style="margin-bottom:10px;">
-                            <b class="text-red">温馨提示: 输入0-50的纯数字. 如输入50, 则系统默认计算50%，充值100，返佣50</b> 
+                            <b class="text-red">温馨提示: 输入0-70的纯数字. 如输入70, 则系统默认计算70%，充值100，返佣70</b> 
                         </div>
                         <div class="form-group">
                             <label for="c-commission_status" class="control-label col-xs-12 col-sm-2">{:__('开关')}:</label>
@@ -187,21 +187,21 @@
                             <div class="form-group">
                                 <label for="c-commission_rate" class="control-label col-xs-12 col-sm-2">{:__('1级分佣')}:</label>
                                 <div class="col-xs-6 col-sm-4">
-                                    <input id="c-commission_rate" class="form-control" name="row[commission_rate][]" type="number" value="{$commission_rate[0] ?: 0}" placeholder="输入0-50的数字" min="0" max="50">
+                                    <input id="c-commission_rate" class="form-control" name="row[commission_rate][]" type="number" value="{$commission_rate[0] ?: 0}" placeholder="输入0-70的数字" min="0" max="70">
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="c-commission_rate" class="control-label col-xs-12 col-sm-2">{:__('2级分佣')}:</label>
                                 <div class="col-xs-6 col-sm-4">
-                                    <input id="c-commission_rate" class="form-control" name="row[commission_rate][]" type="number" value="{$commission_rate[1] ?? 0}" placeholder="输入0-50的数字" min="0" max="50">
+                                    <input id="c-commission_rate" class="form-control" name="row[commission_rate][]" type="number" value="{$commission_rate[1] ?? 0}" placeholder="输入0-70的数字" min="0" max="70">
                                 </div>
                             </div>
 
                             <!-- <div class="form-group">
                                 <label for="c-commission_rate" class="control-label col-xs-12 col-sm-2">{:__('3级分佣')}:</label>
                                 <div class="col-xs-6 col-sm-4">
-                                    <input id="c-commission_rate" class="form-control" name="row[commission_rate][]" type="number" value="{$commission_rate[2] ?? 0}" placeholder="输入0-50的数字" min="0" max="50">
+                                    <input id="c-commission_rate" class="form-control" name="row[commission_rate][]" type="number" value="{$commission_rate[2] ?? 0}" placeholder="输入0-70的数字" min="0" max="70">
                                 </div>
                             </div> -->
                         </div>
